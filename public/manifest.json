@@ -13,6 +13,7 @@
     "default_title": "Extension action title",
     "default_popup": "popup/index.html"
   },
+  "devtools_page": "devtools/index.html",
   "options_page": "options/index.html",
   "background": {
     "service_worker": "background.js"
