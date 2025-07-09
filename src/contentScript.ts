@@ -1,30 +1,12 @@
-const sendDetectionMessage = () => {
-	chrome.runtime.sendMessage({
-		type: "INERTIA_DETECTED",
-		payload: {
-			detected: true,
-		},
-	});
-};
+const SOURCE = "inertia-devtools-internal";
 
-const detectInertia = () => {
-	const inertiaRoot = document.querySelector("[data-page]");
-	if (inertiaRoot) {
-		sendDetectionMessage();
-		return true;
+const script = document.createElement("script");
+script.src = chrome.runtime.getURL("injected.js");
+(document.head || document.documentElement).appendChild(script);
+script.onload = () => script.remove();
+
+window.addEventListener("message", (event) => {
+	if (event.source === window && event.data.source === SOURCE) {
+		chrome.runtime.sendMessage(event.data.message);
 	}
-	return false;
-};
-
-if (!detectInertia()) {
-	let attempts = 0;
-	const interval = setInterval(() => {
-		attempts++;
-		if (detectInertia() || attempts > 10) {
-			clearInterval(interval);
-		}
-	}, 500);
-}
-
-document.addEventListener("inertia:navigate", sendDetectionMessage);
-document.addEventListener("inertia:start", sendDetectionMessage);
+});

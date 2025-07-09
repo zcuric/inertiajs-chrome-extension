@@ -24,17 +24,33 @@ const Panel: React.FC = () => {
     const [requests, setRequests] = useState<InertiaRequest[]>([]);
     const [selectedRequest, setSelectedRequest] = useState<InertiaRequest | null>(null);
     const [isInertiaDetected, setIsInertiaDetected] = useState(false);
+    const tabId = chrome.devtools.inspectedWindow.tabId;
 
     useEffect(() => {
-        chrome.storage.local.get("inertia", ({ inertia }) => {
-            if (inertia?.detected) {
-                setIsInertiaDetected(true);
-            }
-        });
+        const detectedKey = `inertia-detected-${tabId}`;
+        const pageKey = `inertia-page-${tabId}`;
+
+        const getInitialData = () => {
+            chrome.storage.local.get([detectedKey, pageKey], (result) => {
+                if (result[detectedKey]?.detected) {
+                    setIsInertiaDetected(true);
+                }
+                if (result[pageKey]?.page) {
+                    setCurrentPage(result[pageKey].page);
+                }
+            });
+        };
+
+        getInitialData();
 
         const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange; }, areaName: string) => {
-            if (areaName === "local" && changes.inertia) {
-                setIsInertiaDetected(changes.inertia.newValue?.detected);
+            if (areaName !== "local") return;
+
+            if (changes[detectedKey]) {
+                setIsInertiaDetected(changes[detectedKey].newValue?.detected);
+            }
+            if (changes[pageKey]) {
+                setCurrentPage(changes[pageKey].newValue?.page);
             }
         };
 
@@ -43,7 +59,7 @@ const Panel: React.FC = () => {
         return () => {
             chrome.storage.onChanged.removeListener(handleStorageChange);
         };
-    }, []);
+    }, [tabId]);
 
     if (!isInertiaDetected) {
         return (
