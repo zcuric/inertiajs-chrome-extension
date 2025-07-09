@@ -27,5 +27,5 @@ export const server = Bun.serve({
       ws.unsubscribe(channel);
     },
   },
-  port: 8080, // change to whatever you prefer if 8080 isn't available
+  port: 8082, // change to whatever you prefer if 8080 isn't available
 });

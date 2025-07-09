@@ -26,48 +26,22 @@ const Panel: React.FC = () => {
     const [isInertiaDetected, setIsInertiaDetected] = useState(false);
 
     useEffect(() => {
-        console.log('Panel useEffect starting...');
-
-        // Listen for messages from content script
-        const handleMessage = (message: any) => {
-            console.log('Panel received message:', message);
-            if (message.type === 'INERTIA_DETECTED') {
-                console.log('Setting Inertia detected to true');
+        chrome.storage.local.get("inertia", ({ inertia }) => {
+            if (inertia?.detected) {
                 setIsInertiaDetected(true);
-            } else if (message.type === 'INERTIA_PAGE_UPDATE') {
-                console.log('Updating current page:', message.page);
-                setCurrentPage(message.page);
-            } else if (message.type === 'INERTIA_REQUEST') {
-                console.log('Adding new request:', message.request);
-                setRequests(prev => [message.request, ...prev]);
-            } else if (message.type === 'DEVTOOLS_READY') {
-                console.log('DevTools connection established, requesting current state');
-                port.postMessage({ type: 'GET_CURRENT_STATE' });
+            }
+        });
+
+        const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange; }, areaName: string) => {
+            if (areaName === "local" && changes.inertia) {
+                setIsInertiaDetected(changes.inertia.newValue?.detected);
             }
         };
 
-        // Connect to background script
-        console.log('Creating port connection...');
-        const port = chrome.runtime.connect({ name: 'devtools' });
-        console.log('Port created:', port);
-
-        port.onMessage.addListener(handleMessage);
-        console.log('Message listener attached');
-
-        // Send tab ID to initialize connection
-        const tabId = chrome.devtools.inspectedWindow.tabId;
-        console.log('Panel connecting for tab:', tabId);
-
-        // Use setTimeout to ensure the connection is fully established
-        setTimeout(() => {
-            console.log('Sending DEVTOOLS_INIT message');
-            port.postMessage({ type: 'DEVTOOLS_INIT', tabId });
-        }, 10);
+        chrome.storage.onChanged.addListener(handleStorageChange);
 
         return () => {
-            console.log('Panel disconnecting...');
-            port.onMessage.removeListener(handleMessage);
-            port.disconnect();
+            chrome.storage.onChanged.removeListener(handleStorageChange);
         };
     }, []);
 
