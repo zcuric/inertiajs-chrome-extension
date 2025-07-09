@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inertia.js Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+        .debug {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.detected {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .status.not-detected {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Inertia.js DevTools Test Page</h1>
+
+        <div id="status" class="status">Initializing...</div>
+
+        <h3>Test Buttons</h3>
+        <button class="button" onclick="visitDashboard()">Visit Dashboard</button>
+        <button class="button" onclick="visitProfile()">Visit Profile</button>
+        <button class="button" onclick="visitSettings()">Visit Settings</button>
+        <button class="button" onclick="simulateInertiaRequest()">Simulate Inertia Request</button>
+        <button class="button" onclick="clearDebugLog()">Clear Debug Log</button>
+
+        <h3>Debug Console</h3>
+        <div id="debugLog" class="debug"></div>
+    </div>
+
+    <!-- This element simulates the Inertia.js data-page attribute -->
+    <div id="app" data-page='{"component":"Dashboard","props":{"user":{"id":1,"name":"John Doe","email":"john@example.com"},"notifications":[],"stats":{"views":1234,"clicks":567}},"url":"/dashboard","version":"1.0.0"}'>
+        <div>Dashboard Content</div>
+    </div>
+
+    <script>
+        // Debug logging function
+        function debugLog(message, data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('debugLog');
+            const logEntry = document.createElement('div');
+
+            let logText = `[${timestamp}] ${message}`;
+            if (data) {
+                logText += '\n' + JSON.stringify(data, null, 2);
+            }
+
+            logEntry.textContent = logText;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+
+            // Also log to browser console
+            if (data) {
+                console.log(`[TEST PAGE] ${message}`, data);
+            } else {
+                console.log(`[TEST PAGE] ${message}`);
+            }
+        }
+
+        function clearDebugLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+
+        function updateStatus(isDetected) {
+            const statusElement = document.getElementById('status');
+            if (isDetected) {
+                statusElement.textContent = '✅ Inertia.js Extension Detected';
+                statusElement.className = 'status detected';
+            } else {
+                statusElement.textContent = '❌ Inertia.js Extension Not Detected';
+                statusElement.className = 'status not-detected';
+            }
+        }
+
+        // Simulate Inertia.js global object
+        window.Inertia = {
+            version: '1.0.0',
+            page: {
+                component: 'Dashboard',
+                props: {
+                    user: { id: 1, name: 'John Doe', email: 'john@example.com' },
+                    notifications: [],
+                    stats: { views: 1234, clicks: 567 }
+                },
+                url: '/dashboard',
+                version: '1.0.0'
+            },
+
+            // Event system simulation
+            listeners: {},
+
+            on: function(event, callback) {
+                debugLog(`Inertia.on('${event}') called`);
+                if (!this.listeners[event]) {
+                    this.listeners[event] = [];
+                }
+                this.listeners[event].push(callback);
+            },
+
+            emit: function(event, data) {
+                debugLog(`Inertia.emit('${event}')`, data);
+                if (this.listeners[event]) {
+                    this.listeners[event].forEach(callback => callback(data));
+                }
+            },
+
+            visit: function(url, options = {}) {
+                debugLog(`Inertia.visit('${url}')`, options);
+
+                this.emit('start', { url, options });
+
+                // Simulate a visit with delay
+                setTimeout(() => {
+                    this.emit('progress', { percentage: 50 });
+
+                    setTimeout(() => {
+                        this.emit('finish', { url });
+                        this.emit('success', {
+                            page: this.page,
+                            url: url
+                        });
+                    }, 500);
+                }, 200);
+            }
+        };
+
+        // Page visit simulation functions
+        function visitDashboard() {
+            debugLog('Visiting Dashboard page');
+            updatePageData({
+                component: 'Dashboard',
+                props: {
+                    user: { id: 1, name: 'John Doe', email: 'john@example.com' },
+                    notifications: [],
+                    stats: { views: 1234, clicks: 567 }
+                },
+                url: '/dashboard',
+                version: '1.0.0'
+            });
+            window.Inertia.visit('/dashboard');
+        }
+
+        function visitProfile() {
+            debugLog('Visiting Profile page');
+            updatePageData({
+                component: 'Profile',
+                props: {
+                    user: { id: 1, name: 'John Doe', email: 'john@example.com', bio: 'Software Engineer' },
+                    settings: { notifications: true, theme: 'dark' }
+                },
+                url: '/profile',
+                version: '1.0.0'
+            });
+            window.Inertia.visit('/profile');
+        }
+
+        function visitSettings() {
+            debugLog('Visiting Settings page');
+            updatePageData({
+                component: 'Settings',
+                props: {
+                    settings: {
+                        notifications: true,
+                        theme: 'dark',
+                        language: 'en',
+                        timezone: 'UTC'
+                    }
+                },
+                url: '/settings',
+                version: '1.0.0'
+            });
+            window.Inertia.visit('/settings');
+        }
+
+        function updatePageData(pageData) {
+            const appElement = document.getElementById('app');
+            appElement.setAttribute('data-page', JSON.stringify(pageData));
+            window.Inertia.page = pageData;
+            debugLog('Updated data-page attribute', pageData);
+        }
+
+        function simulateInertiaRequest() {
+            debugLog('Simulating Inertia AJAX request');
+
+            // Simulate an Inertia request with proper headers
+            fetch('/api/test', {
+                method: 'GET',
+                headers: {
+                    'X-Inertia': 'true',
+                    'X-Inertia-Version': '1.0.0',
+                    'Accept': 'text/html, application/xhtml+xml',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).catch(() => {
+                // We expect this to fail since it's a test URL
+                debugLog('Mock request completed (expected to fail)');
+            });
+        }
+
+        // Check if extension is running
+        function checkExtensionStatus() {
+            // The extension should inject content scripts
+            if (window.chrome && window.chrome.runtime) {
+                debugLog('Chrome extension context detected');
+                updateStatus(true);
+            } else {
+                debugLog('Chrome extension context not found');
+                updateStatus(false);
+            }
+        }
+
+        // Monitor for extension messages
+        function monitorMessages() {
+            // Listen for any messages that might be sent by the extension
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.source === 'inertia-devtools') {
+                    debugLog('Received message from extension', event.data);
+                }
+            });
+        }
+
+        // Initialize the test page
+        debugLog('Test page initializing...');
+        debugLog('window.Inertia object created', window.Inertia);
+        debugLog('Initial data-page attribute set');
+
+        // Run checks after a short delay to let everything load
+        setTimeout(() => {
+            checkExtensionStatus();
+            monitorMessages();
+            debugLog('Test page ready for extension testing');
+        }, 1000);
+
+        // Simulate some Inertia events after initialization
+        setTimeout(() => {
+            debugLog('Triggering initial Inertia events');
+            window.Inertia.emit('start', { url: '/dashboard' });
+            setTimeout(() => {
+                window.Inertia.emit('success', {
+                    page: window.Inertia.page
+                });
+            }, 500);
+        }, 2000);
+    </script>
+</body>
+</html>

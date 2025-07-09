@@ -1,6 +1,6 @@
 {
-  "name": "Extension name",
-  "description": "Extension description",
+  "name": "Inertia Devtools",
+  "description": "Chrome Devtools extension for Inertia.js",
   "version": "0.1.0",
   "manifest_version": 3,
   "icons": {
@@ -17,7 +17,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": [],
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],

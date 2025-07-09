@@ -53,6 +53,8 @@ for await (const filename of glob.scan(publicFolder)) {
   if (filename.endsWith(ext.html)) {
     const fileFolder = filename.replace(ext.html, "");
 
+    await $`mkdir -p ${outdir}/${fileFolder}`;
+
     // rename files to index.html since it's being copied into a folder that share its original name
     await $`cp ${file.name} ${outdir}/${fileFolder}/index.html`;
     // copy the css file into the folder
