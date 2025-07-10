@@ -613,12 +613,6 @@ const Panel: React.FC = () => {
                                         Shared
                                     </button>
                                     <button
-                                        onClick={() => setActivePageView('diff')}
-                                        className={`py-2 px-1 border-b-2 font-medium text-sm ${activePageView === 'diff' ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-500 hover:text-slate-600'}`}
-                                    >
-                                        Diff
-                                    </button>
-                                    <button
                                         onClick={() => setActivePageView('deferred')}
                                         className={`py-2 px-1 border-b-2 font-medium text-sm ${activePageView === 'deferred' ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-500 hover:text-slate-600'}`}
                                     >
@@ -643,12 +637,6 @@ const Panel: React.FC = () => {
                                     }
                                     {activePageView === 'shared' &&
                                         <JsonView value={getSharedData()} {...jsonViewProps} />
-                                    }
-                                    {activePageView === 'diff' &&
-                                        <JsonView
-                                            value={currentPage.props || {}}
-                                            {...{...jsonViewProps, oldValue: previousPage?.props || {}}}
-                                        />
                                     }
                                     {activePageView === 'deferred' &&
                                         <JsonView value={getDeferredData()} {...jsonViewProps} />
