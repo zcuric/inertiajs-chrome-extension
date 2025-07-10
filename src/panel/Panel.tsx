@@ -73,6 +73,7 @@ const Panel: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<InertiaPage | null>(null);
     const [requests, setRequests] = useState<InertiaRequest[]>([]);
     const [selectedRequest, setSelectedRequest] = useState<InertiaRequest | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [isInertiaDetected, setIsInertiaDetected] = useState(false);
     const [framework, setFramework] = useState<{ name: string, version?: string } | null>(null);
     const [activeTab, setActiveTab] = useState('page');
@@ -223,7 +224,13 @@ const Panel: React.FC = () => {
         const requestsKey = `inertia-requests-${tabId}`;
 
         const getInitialData = () => {
+            // Set a timeout to prevent indefinite loading state
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 2000);
+
             chrome.storage.local.get([detectedKey, pageKey, requestsKey], (result) => {
+                clearTimeout(timer);
                 if (result[detectedKey]?.detected) {
                     setIsInertiaDetected(true);
                     setFramework(result[detectedKey]?.framework);
@@ -234,6 +241,7 @@ const Panel: React.FC = () => {
                 if (result[requestsKey]?.requests) {
                     setRequests(result[requestsKey].requests);
                 }
+                setIsLoading(false);
             });
         };
 
@@ -336,15 +344,31 @@ const Panel: React.FC = () => {
         },
     };
 
+    if (isLoading) {
+        return (
+            <div className={`flex items-center justify-center h-full ${effectiveTheme === 'dark' ? 'dark bg-github-dark-bg' : 'bg-gray-50'}`}>
+                <div className="text-center p-8">
+                    <div className="text-4xl mb-4 animate-pulse">⏳</div>
+                    <h2 className="text-xl font-semibold text-gray-700 dark:text-github-dark-text mb-2">
+                        Looking for Inertia.js...
+                    </h2>
+                    <p className="text-gray-500 dark:text-github-dark-text-secondary">
+                        Waiting for the page to finish loading.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     if (!isInertiaDetected) {
         return (
-            <div className="flex items-center justify-center h-full bg-gray-50">
+            <div className={`flex items-center justify-center h-full ${effectiveTheme === 'dark' ? 'dark bg-github-dark-bg' : 'bg-gray-50'}`}>
                 <div className="text-center p-8">
                     <div className="text-6xl mb-4">🔍</div>
-                    <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                    <h2 className="text-xl font-semibold text-gray-700 dark:text-github-dark-text mb-2">
                         No Inertia.js app detected
                     </h2>
-                    <p className="text-gray-500">
+                    <p className="text-gray-500 dark:text-github-dark-text-secondary">
                         Visit a page with an Inertia.js application to start debugging
                     </p>
                 </div>
