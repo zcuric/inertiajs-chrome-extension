@@ -40,8 +40,10 @@ const defaultJsonViewSettings: JsonViewSettings = {
     collapsed: 1,
     highlightUpdates: true,
     shortenTextAfterLength: 30,
-    theme: 'githubLight',
-    fontSize: 13,
+    theme: 'vscodeTheme',
+    fontSize: 14,
+    quotesOnKeys: true,
+    iconStyle: 'triangle',
 };
 
 const defaultSettings: PanelSettings = {

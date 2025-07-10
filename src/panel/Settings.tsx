@@ -6,11 +6,13 @@ export interface JsonViewSettings {
     displayObjectSize: boolean;
     displayDataTypes: boolean;
     enableClipboard: boolean;
-    collapsed: number;
+    collapsed: number | boolean;
     highlightUpdates: boolean;
     shortenTextAfterLength: number;
     theme: string;
     fontSize: number;
+    quotesOnKeys: boolean;
+    iconStyle: 'triangle' | 'square' | 'circle';
 }
 
 export interface PanelSettings {
@@ -19,17 +21,17 @@ export interface PanelSettings {
     jsonView: JsonViewSettings;
 }
 
-const themeOptions = [
-    'lightTheme',
-    'darkTheme',
-    'nordTheme',
-    'githubLightTheme',
-    'githubDarkTheme',
-    'vscodeTheme',
-    'gruvboxTheme',
-    'monokaiTheme',
-    'basicTheme'
-];
+const themeOptions = {
+    lightTheme: 'Light',
+    darkTheme: 'Dark',
+    nordTheme: 'Nord',
+    githubLightTheme: 'Github Light',
+    githubDarkTheme: 'Github Dark',
+    vscodeTheme: 'VSCode',
+    gruvboxTheme: 'Gruvbox',
+    monokaiTheme: 'Monokai',
+    basicTheme: 'Basic'
+};
 
 interface SettingsProps {
     settings: PanelSettings;
@@ -96,75 +98,105 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
             </div>
             <div>
                 <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">JSON Viewer</h3>
-                <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg space-y-4">
-                    <div className="flex items-center justify-between text-sm">
+                <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg grid grid-cols-2 gap-4">
+                    <div className="text-sm">
                         <label className="font-medium dark:text-github-dark-text-secondary">Theme</label>
                         <select
                             value={settings.jsonView.theme}
                             onChange={(e) => handleJsonViewChange('theme', e.target.value)}
-                            className="px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
+                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
                         >
-                            {themeOptions.map(theme => <option key={theme} value={theme}>{theme}</option>)}
+                            {Object.entries(themeOptions).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                         </select>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="text-sm">
                         <label className="font-medium dark:text-github-dark-text-secondary">Font Size</label>
                         <input
                             type="number"
                             value={settings.jsonView.fontSize}
                             onChange={(e) => handleJsonViewChange('fontSize', parseInt(e.target.value, 10))}
-                            className="w-20 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
+                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
                         />
                     </div>
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="text-sm">
                         <label className="font-medium dark:text-github-dark-text-secondary">Indent Width</label>
                         <input
                             type="number"
                             value={settings.jsonView.indentWidth}
                             onChange={(e) => handleJsonViewChange('indentWidth', parseInt(e.target.value, 10))}
-                            className="w-20 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
+                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
                         />
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Collapsed Depth</label>
+                    <div className="text-sm">
+                        <label className="font-medium dark:text-github-dark-text-secondary">Icon Style</label>
+                        <select
+                            value={settings.jsonView.iconStyle}
+                            onChange={(e) => handleJsonViewChange('iconStyle', e.target.value)}
+                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
+                        >
+                            <option value="triangle">Triangle</option>
+                            <option value="square">Square</option>
+                            <option value="circle">Circle</option>
+                        </select>
+                    </div>
+                     <div className="text-sm">
+                        <label className="font-medium dark:text-github-dark-text-secondary">Collapsed</label>
                         <input
                             type="number"
-                            value={settings.jsonView.collapsed}
+                            value={typeof settings.jsonView.collapsed === 'number' ? settings.jsonView.collapsed : 1}
                             onChange={(e) => handleJsonViewChange('collapsed', parseInt(e.target.value, 10))}
-                            className="w-20 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
+                             className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
                         />
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Display Object Size</label>
-                        <input
-                            type="checkbox"
-                            checked={settings.jsonView.displayObjectSize}
-                            onChange={(e) => handleJsonViewChange('displayObjectSize', e.target.checked)}
-                        />
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Display Data Types</label>
-                        <input
-                            type="checkbox"
-                            checked={settings.jsonView.displayDataTypes}
-                            onChange={(e) => handleJsonViewChange('displayDataTypes', e.target.checked)}
-                        />
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Enable Clipboard</label>
-                        <input
-                            type="checkbox"
-                            checked={settings.jsonView.enableClipboard}
-                            onChange={(e) => handleJsonViewChange('enableClipboard', e.target.checked)}
-                        />
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Sort Object Keys</label>
-                        <input
-                            type="checkbox"
-                            checked={settings.jsonView.objectSortKeys}
-                            onChange={(e) => handleJsonViewChange('objectSortKeys', e.target.checked)}
-                        />
+                    <div className="col-span-2 grid grid-cols-2 gap-4">
+                        <div className="flex items-center justify-between text-sm">
+                            <label className="font-medium dark:text-github-dark-text-secondary">Display Object Size</label>
+                            <input
+                                type="checkbox"
+                                checked={settings.jsonView.displayObjectSize}
+                                onChange={(e) => handleJsonViewChange('displayObjectSize', e.target.checked)}
+                            />
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                            <label className="font-medium dark:text-github-dark-text-secondary">Display Data Types</label>
+                            <input
+                                type="checkbox"
+                                checked={settings.jsonView.displayDataTypes}
+                                onChange={(e) => handleJsonViewChange('displayDataTypes', e.target.checked)}
+                            />
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                            <label className="font-medium dark:text-github-dark-text-secondary">Enable Clipboard</label>
+                            <input
+                                type="checkbox"
+                                checked={settings.jsonView.enableClipboard}
+                                onChange={(e) => handleJsonViewChange('enableClipboard', e.target.checked)}
+                            />
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                            <label className="font-medium dark:text-github-dark-text-secondary">Sort Object Keys</label>
+                            <input
+                                type="checkbox"
+                                checked={settings.jsonView.objectSortKeys}
+                                onChange={(e) => handleJsonViewChange('objectSortKeys', e.target.checked)}
+                            />
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                            <label className="font-medium dark:text-github-dark-text-secondary">Quotes on Keys</label>
+                            <input
+                                type="checkbox"
+                                checked={settings.jsonView.quotesOnKeys}
+                                onChange={(e) => handleJsonViewChange('quotesOnKeys', e.target.checked)}
+                            />
+                        </div>
+                         <div className="flex items-center justify-between text-sm">
+                            <label className="font-medium dark:text-github-dark-text-secondary">Highlight Updates</label>
+                            <input
+                                type="checkbox"
+                                checked={settings.jsonView.highlightUpdates}
+                                onChange={(e) => handleJsonViewChange('highlightUpdates', e.target.checked)}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
