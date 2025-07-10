@@ -1,6 +1,13 @@
 {
-  "name": "bun-chrome-extension",
-  "module": "index.ts",
+  "name": "inertiajs-chrome-extension",
+  "version": "1.0.0",
+  "description": "A browser extension for debugging Inertia.js applications, built with Bun, React, and TypeScript.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zcuric/inertiajs-chrome-extension"
+  },
+  "homepage": "https://github.com/zcuric/inertiajs-chrome-extension",
   "scripts": {
     "build": "bun run config/build.ts",
     "dev": "bun run config/watch.ts --dir=src,public",
@@ -8,27 +15,27 @@
     "css": "postcss"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.8.3",
-    "@types/adm-zip": "^0.5.5",
+    "@biomejs/biome": "^2.1.1",
+    "@types/adm-zip": "^0.5.7",
     "@types/bun": "latest",
-    "@types/chrome": "^0.0.270",
-    "@types/react-dom": "^18.3.0",
-    "adm-zip": "^0.5.15",
-    "autoprefixer": "^10.4.20",
-    "chalk": "^5.3.0",
-    "lefthook": "^1.7.14",
-    "postcss": "^8.4.41",
-    "postcss-cli": "^11.0.0",
-    "postcss-import": "^16.1.0",
-    "tailwindcss": "^3.4.10"
+    "@types/chrome": "^0.0.332",
+    "@types/react-dom": "^19.1.6",
+    "adm-zip": "^0.5.16",
+    "autoprefixer": "^10.4.21",
+    "chalk": "^5.4.1",
+    "lefthook": "^1.12.1",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "postcss-import": "^16.1.1",
+    "tailwindcss": "^4.1.11"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "@uiw/react-json-view": "^2.0.0-alpha.32",
-    "element-ready": "^7.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "element-ready": "^8.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }
