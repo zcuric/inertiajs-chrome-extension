@@ -72,6 +72,7 @@ const Panel: React.FC = () => {
     const [activeTab, setActiveTab] = useState('currentPage');
     const [settings, setSettings] = useState<PanelSettings>(defaultSettings);
     const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light');
+    const [highlightSearch, setHighlightSearch] = useState<string>('');
     const tabId = chrome.devtools.inspectedWindow.tabId;
 
     const handleClear = () => {
@@ -164,7 +165,8 @@ const Panel: React.FC = () => {
             fontSize: `${settings.jsonView.fontSize}px`,
             padding: '12px',
             lineHeight: '1.4',
-        }
+        },
+        highlightSearch: highlightSearch,
     };
 
     if (!isInertiaDetected) {
@@ -260,6 +262,17 @@ const Panel: React.FC = () => {
                             Request details
                         </button>
                         <div className="flex-1" />
+                        {['currentPage', 'requestDetails'].includes(activeTab) && (
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Search..."
+                                    value={highlightSearch}
+                                    onChange={(e) => setHighlightSearch(e.target.value)}
+                                    className="px-2 py-1 text-sm bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                />
+                            </div>
+                        )}
                         <button
                             onClick={() => setActiveTab('settings')}
                             className={`p-2 rounded-full text-slate-500 dark:text-github-dark-text-secondary hover:bg-slate-200 dark:hover:bg-github-dark-button-hover-bg ${
