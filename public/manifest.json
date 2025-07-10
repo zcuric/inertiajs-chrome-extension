@@ -1,6 +1,6 @@
 {
   "name": "Inertia.js Devtools",
-  "description": "The official Inertia.js devtools extension.",
+  "description": "The unofficial Inertia.js devtools extension.",
   "version": "1.0.0",
   "manifest_version": 3,
   "icons": {
