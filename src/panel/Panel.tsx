@@ -334,8 +334,10 @@ const Panel: React.FC = () => {
         }
     };
 
+    const { quotesOnKeys, ...restJsonViewSettings } = settings.jsonView;
+
     const jsonViewProps = {
-        ...settings.jsonView,
+        ...restJsonViewSettings,
         style: {
             ...themes[settings.jsonView.theme as keyof typeof themes],
             fontSize: `${settings.jsonView.fontSize}px`,
@@ -563,7 +565,9 @@ const Panel: React.FC = () => {
                                                         displayDataTypes={false}
                                                         enableClipboard={true}
                                                         style={{ padding: '12px' }}
-                                                    />
+                                                    >
+                                                        {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+                                                    </JsonView>
                                                 </div>
                                             </div>
                                         )}
@@ -583,7 +587,9 @@ const Panel: React.FC = () => {
                                                 <JsonView
                                                     value={selectedRequest.props || {}}
                                                     {...jsonViewProps}
-                                                />
+                                                >
+                                                    {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+                                                </JsonView>
                                             </div>
                                         </div>
                                     </div>
@@ -657,13 +663,19 @@ const Panel: React.FC = () => {
                                         isCollapsed={settings.jsonView.collapsed !== false}
                                     />
                                     {activePageView === 'props' &&
-                                        <JsonView value={currentPage.props || {}} {...jsonViewProps} />
+                                        <JsonView value={currentPage.props || {}} {...jsonViewProps}>
+                                            {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+                                        </JsonView>
                                     }
                                     {activePageView === 'shared' &&
-                                        <JsonView value={getSharedData()} {...jsonViewProps} />
+                                        <JsonView value={getSharedData()} {...jsonViewProps}>
+                                            {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+                                        </JsonView>
                                     }
                                     {activePageView === 'deferred' &&
-                                        <JsonView value={getDeferredData()} {...jsonViewProps} />
+                                        <JsonView value={getDeferredData()} {...jsonViewProps}>
+                                            {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+                                        </JsonView>
                                     }
                                 </div>
                             </div>
@@ -729,7 +741,9 @@ const Panel: React.FC = () => {
                                                                 onFontSizeDecrease={() => handleFontSizeChange(-1)}
                                                                 isCollapsed={settings.jsonView.collapsed !== false}
                                                             />
-                                                            <JsonView value={selectedRequest.data} {...jsonViewProps} />
+                                                            <JsonView value={selectedRequest.data} {...jsonViewProps}>
+                                                                {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+                                                            </JsonView>
                                                         </div>
                                                     </div>
                                                 )}
@@ -742,7 +756,9 @@ const Panel: React.FC = () => {
                                                                 displayDataTypes={false}
                                                                 enableClipboard={true}
                                                                 style={{ padding: '12px' }}
-                                                            />
+                                                            >
+                                                                {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+                                                            </JsonView>
                                                         </div>
                                                     </div>
                                                 )}
