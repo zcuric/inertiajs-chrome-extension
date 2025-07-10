@@ -1,0 +1,37 @@
+name: Release Inertia.js Devtools Extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build_and_release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build extension
+        run: bun run build
+
+      - name: Package extension
+        run: bun run pack
+
+      - name: Get package name
+        id: package_name
+        run: echo "name=$(node -p "require('./public/manifest.json').name.toLowerCase().replace(/[\s\W]+/g, '-')")" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/${{ steps.package_name.outputs.name }}-${{ github.ref_name }}.zip
