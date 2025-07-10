@@ -40,16 +40,14 @@ const defaultJsonViewSettings: JsonViewSettings = {
     enableClipboard: true,
     collapsed: false,
     highlightUpdates: true,
-    shortenTextAfterLength: 30,
+    shortenTextAfterLength: 0,
     theme: 'vscodeTheme',
     fontSize: 14,
     quotesOnKeys: true,
-    iconStyle: 'triangle',
 };
 
 const defaultSettings: PanelSettings = {
     appTheme: 'system',
-    showRequestHistory: true,
     jsonView: defaultJsonViewSettings,
 };
 
@@ -67,6 +65,8 @@ interface InertiaRequest {
     visitType: 'initial' | 'navigate';
     isRedirect: boolean;
     data?: Record<string, any>;
+    isPartial?: boolean;
+    only?: string[];
 }
 
 const Panel: React.FC = () => {
@@ -87,6 +87,24 @@ const Panel: React.FC = () => {
     const [matchingPaths, setMatchingPaths] = useState<string[][]>([]);
     const [searchResultIndex, setSearchResultIndex] = useState(0);
     const [previousPage, setPreviousPage] = useState<InertiaPage | null>(null);
+
+    const getDeferredData = () => {
+        if (!currentPage) return {};
+
+        const deferredKeys = Object.keys(currentPage.props).filter(key => {
+            if (previousPage) {
+                // A prop is likely deferred if it was null/undefined on the previous page and now has a value
+                return (previousPage.props[key] === null || typeof previousPage.props[key] === 'undefined') && currentPage.props[key] !== null && typeof currentPage.props[key] !== 'undefined';
+            }
+            // Fallback for initial load: find props that are objects with no keys, a common pattern for deferred placeholders.
+            return typeof currentPage.props[key] === 'object' && currentPage.props[key] !== null && Object.keys(currentPage.props[key]).length === 0;
+        });
+
+        return deferredKeys.reduce((acc, key) => {
+            acc[key] = currentPage.props[key];
+            return acc;
+        }, {} as Record<string, any>);
+    };
 
     const handleClear = () => {
         setRequests([]);
@@ -448,6 +466,7 @@ const Panel: React.FC = () => {
                                                     </span>
                                                     {request.isRedirect && <span className="text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 px-1.5 py-0.5 rounded-full">REDIRECT</span>}
                                                     {request.visitType === 'initial' && <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-1.5 py-0.5 rounded-full">INITIAL</span>}
+                                                    {request.isPartial && <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1.5 py-0.5 rounded-full">PARTIAL</span>}
                                                 </div>
                                                 <span className="text-xs dark:text-github-dark-text-secondary">
                                                     {new Date(request.timestamp).toLocaleTimeString()}
@@ -491,6 +510,16 @@ const Panel: React.FC = () => {
                                                         <span className="ml-2 dark:text-github-dark-text">{selectedRequest.responseTime}ms</span>
                                                     </div>
                                                 </div>
+                                                {selectedRequest.isPartial && selectedRequest.only && (
+                                                    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                                                        <span className="font-medium dark:text-github-dark-text-secondary">Partially Loaded Props:</span>
+                                                        <div className="flex flex-wrap gap-2 mt-2">
+                                                            {selectedRequest.only.map(prop => (
+                                                                <span key={prop} className="px-2 py-1 text-xs font-mono bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded-full">{prop}</span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <div>
@@ -616,6 +645,12 @@ const Panel: React.FC = () => {
                                     >
                                         Diff
                                     </button>
+                                    <button
+                                        onClick={() => setActivePageView('deferred')}
+                                        className={`py-2 px-1 border-b-2 font-medium text-sm ${activePageView === 'deferred' ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-500 hover:text-slate-600'}`}
+                                    >
+                                        Deferred
+                                    </button>
                                 </nav>
                             </div>
                             <div className="mt-4">
@@ -637,7 +672,14 @@ const Panel: React.FC = () => {
                                         <JsonView ref={jsonViewRef} value={getSharedData()} {...jsonViewProps} />
                                     }
                                     {activePageView === 'diff' &&
-                                        <JsonView ref={jsonViewRef} oldValue={previousPage?.props || {}} value={currentPage.props || {}} {...jsonViewProps as any} />
+                                        <JsonView
+                                            ref={jsonViewRef}
+                                            value={currentPage.props || {}}
+                                            {...{...jsonViewProps, oldValue: previousPage?.props || {}}}
+                                        />
+                                    }
+                                    {activePageView === 'deferred' &&
+                                        <JsonView ref={jsonViewRef} value={getDeferredData()} {...jsonViewProps} />
                                     }
                                 </div>
                             </div>

@@ -12,12 +12,10 @@ export interface JsonViewSettings {
     theme: string;
     fontSize: number;
     quotesOnKeys: boolean;
-    iconStyle: 'triangle' | 'square' | 'circle';
 }
 
 export interface PanelSettings {
     appTheme: 'light' | 'dark' | 'system';
-    showRequestHistory: boolean;
     jsonView: JsonViewSettings;
 }
 
@@ -86,14 +84,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
                             </button>
                         </div>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Show Request History</label>
-                        <input
-                            type="checkbox"
-                            checked={settings.showRequestHistory}
-                            onChange={(e) => onSettingsChange({ ...settings, showRequestHistory: e.target.checked })}
-                        />
-                    </div>
                 </div>
             </div>
             <div>
@@ -128,18 +118,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
                         />
                     </div>
                     <div className="text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Icon Style</label>
-                        <select
-                            value={settings.jsonView.iconStyle}
-                            onChange={(e) => handleJsonViewChange('iconStyle', e.target.value)}
-                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
-                        >
-                            <option value="triangle">Triangle</option>
-                            <option value="square">Square</option>
-                            <option value="circle">Circle</option>
-                        </select>
-                    </div>
-                     <div className="text-sm">
                         <label className="font-medium dark:text-github-dark-text-secondary">Collapsed</label>
                         <input
                             type="number"

@@ -63,19 +63,23 @@ const requests = {};
 
 document.addEventListener("inertia:start", (event) => {
 	const id = new Date().getTime().toString() + Math.random().toString(36);
+	const { visit } = event.detail;
+
 	requests[id] = {
 		id,
 		timestamp: new Date().getTime(),
-		method: event.detail.visit.method.toUpperCase(),
-		url: event.detail.visit.url.href,
+		method: visit.method.toUpperCase(),
+		url: visit.url.href,
 		component: null,
 		props: null,
-		data: event.detail.visit.data,
-		headers: event.detail.visit.headers,
+		data: visit.data,
+		headers: visit.headers,
 		responseTime: null,
 		status: "pending",
 		visitType: isInitialVisit ? "initial" : "navigate",
 		isRedirect: false,
+		isPartial: !!visit.only?.length,
+		only: visit.only,
 	};
 	isInitialVisit = false;
 	event.detail.visit.id = id;
