@@ -480,9 +480,9 @@ const Panel: React.FC = () => {
                                     ))}
                                 </div>
                             </div>
-                            <div className="w-2/3 flex-1 flex flex-col" ref={requestsContainerRef}>
+                            <div className="w-2/3 flex-1 flex flex-col min-w-0" ref={requestsContainerRef}>
                                 {selectedRequest ? (
-                                    <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                                    <div className="flex-1 overflow-y-auto overflow-x-auto p-4 space-y-6">
                                         <div>
                                             <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Request Details</h3>
                                             <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
@@ -493,15 +493,15 @@ const Panel: React.FC = () => {
                                                     </div>
                                                     <div>
                                                         <span className="font-medium dark:text-github-dark-text-secondary">Method:</span>
-                                                        <span className="ml-2 font-mono dark:text-github-dark-text">{selectedRequest.method}</span>
+                                                        <span className="ml-2 font-mono dark:text-github-dark-text truncate">{selectedRequest.method}</span>
                                                     </div>
                                                     <div>
                                                         <span className="font-medium dark:text-github-dark-text-secondary">URL:</span>
-                                                        <span className="ml-2 dark:text-github-dark-text">{selectedRequest.url}</span>
+                                                        <span className="ml-2 dark:text-github-dark-text truncate break-all">{selectedRequest.url}</span>
                                                     </div>
                                                     <div>
                                                         <span className="font-medium dark:text-github-dark-text-secondary">Component:</span>
-                                                        <span className="ml-2 font-mono dark:text-github-dark-text">{selectedRequest.component}</span>
+                                                        <span className="ml-2 font-mono dark:text-github-dark-text truncate break-all">{selectedRequest.component}</span>
                                                     </div>
                                                     <div>
                                                         <span className="font-medium dark:text-github-dark-text-secondary">Response time:</span>
@@ -525,7 +525,7 @@ const Panel: React.FC = () => {
                                             <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg text-sm space-y-2">
                                                 <div>
                                                     <span className="font-medium dark:text-github-dark-text-secondary">Full URL:</span>
-                                                    <span className="ml-2 font-mono dark:text-github-dark-text break-all">{selectedRequest.url}</span>
+                                                    <span className="ml-2 font-mono dark:text-github-dark-text break-all truncate">{selectedRequest.url}</span>
                                                 </div>
                                                 <div>
                                                     <span className="font-medium dark:text-github-dark-text-secondary">Query Parameters:</span>
