@@ -82,9 +82,9 @@ const Panel: React.FC = () => {
     const [highlightSearch, setHighlightSearch] = useState('');
     const [routesSearch, setRoutesSearch] = useState('');
     const tabId = chrome.devtools.inspectedWindow.tabId;
-    const jsonViewRef = useRef<HTMLDivElement>(null);
-    const jsonViewRef2 = useRef<HTMLDivElement>(null);
-    const [matchingPaths, setMatchingPaths] = useState<string[][]>([]);
+    const pageContainerRef = useRef<HTMLDivElement>(null);
+    const requestsContainerRef = useRef<HTMLDivElement>(null);
+    const formsContainerRef = useRef<HTMLDivElement>(null);
     const [searchResultIndex, setSearchResultIndex] = useState(0);
     const [previousPage, setPreviousPage] = useState<InertiaPage | null>(null);
 
@@ -192,8 +192,14 @@ const Panel: React.FC = () => {
             });
         };
 
-        const ref = activeTab === 'requests' ? jsonViewRef : jsonViewRef2;
-        const container = ref.current;
+        let container: HTMLDivElement | null = null;
+        if (activeTab === 'page') {
+            container = pageContainerRef.current;
+        } else if (activeTab === 'requests') {
+            container = requestsContainerRef.current;
+        } else if (activeTab === 'forms') {
+            container = formsContainerRef.current;
+        }
 
         if (!container) return;
 
@@ -205,6 +211,7 @@ const Panel: React.FC = () => {
             if (highlightedNodes.length > 0) {
                 const activeNode = highlightedNodes[searchResultIndex % highlightedNodes.length];
                 activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                container.querySelectorAll('mark.active-highlight').forEach(node => node.classList.remove('active-highlight'));
                 activeNode.classList.add('active-highlight');
             }
         }
@@ -257,47 +264,6 @@ const Panel: React.FC = () => {
         };
     }, [tabId]);
 
-    useEffect(() => {
-        if (!highlightSearch) {
-            setMatchingPaths([]);
-            setSearchResultIndex(0);
-            return;
-        }
-
-        const data = activeTab === 'requests' ? currentPage?.props : selectedRequest?.props;
-
-        if (!data) {
-            setMatchingPaths([]);
-            setSearchResultIndex(0);
-            return;
-        }
-
-        const findPaths = (value: any, currentPath: string[] = []): string[][] => {
-            let paths: string[][] = [];
-
-            if (typeof value === 'object' && value !== null) {
-                for (const key in value) {
-                    if (Object.prototype.hasOwnProperty.call(value, key)) {
-                        const newPath = [...currentPath, key];
-                        if (String(key).toLowerCase().includes(highlightSearch.toLowerCase())) {
-                            paths.push(newPath);
-                        }
-                        paths = paths.concat(findPaths(value[key], newPath));
-                    }
-                }
-            } else if (value !== null && value !== undefined) {
-                if (String(value).toLowerCase().includes(highlightSearch.toLowerCase())) {
-                    paths.push(currentPath);
-                }
-            }
-
-            return paths;
-        };
-
-        setMatchingPaths(findPaths(data));
-        setSearchResultIndex(0);
-    }, [highlightSearch, currentPage, selectedRequest, activeTab]);
-
     const getSharedData = () => {
         if (!currentPage || !previousPage) return {};
 
@@ -337,8 +303,16 @@ const Panel: React.FC = () => {
     const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            const ref = activeTab === 'requests' ? jsonViewRef : jsonViewRef2;
-            const container = ref.current;
+
+            let container: HTMLDivElement | null = null;
+            if (activeTab === 'page') {
+                container = pageContainerRef.current;
+            } else if (activeTab === 'requests') {
+                container = requestsContainerRef.current;
+            } else if (activeTab === 'forms') {
+                container = formsContainerRef.current;
+            }
+
             if (!container) return;
 
             const highlightedNodes = container.querySelectorAll('mark');
@@ -482,7 +456,7 @@ const Panel: React.FC = () => {
                                     ))}
                                 </div>
                             </div>
-                            <div className="w-2/3 flex-1 flex flex-col">
+                            <div className="w-2/3 flex-1 flex flex-col" ref={requestsContainerRef}>
                                 {selectedRequest ? (
                                     <div className="flex-1 overflow-y-auto p-4 space-y-6">
                                         <div>
@@ -584,7 +558,6 @@ const Panel: React.FC = () => {
                                                 />
                                                 <JsonView
                                                     value={selectedRequest.props || {}}
-                                                    ref={jsonViewRef2}
                                                     {...jsonViewProps}
                                                 />
                                             </div>
@@ -599,7 +572,7 @@ const Panel: React.FC = () => {
                         </div>
                     )}
                     {activeTab === 'page' && currentPage && (
-                        <div>
+                        <div ref={pageContainerRef}>
                             <div className="mb-6 p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
                                 <h3 className="text-lg font-semibold dark:text-github-dark-text mb-2">Current Page</h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -666,20 +639,19 @@ const Panel: React.FC = () => {
                                         isCollapsed={settings.jsonView.collapsed !== false}
                                     />
                                     {activePageView === 'props' &&
-                                        <JsonView ref={jsonViewRef} value={currentPage.props || {}} {...jsonViewProps} />
+                                        <JsonView value={currentPage.props || {}} {...jsonViewProps} />
                                     }
                                     {activePageView === 'shared' &&
-                                        <JsonView ref={jsonViewRef} value={getSharedData()} {...jsonViewProps} />
+                                        <JsonView value={getSharedData()} {...jsonViewProps} />
                                     }
                                     {activePageView === 'diff' &&
                                         <JsonView
-                                            ref={jsonViewRef}
                                             value={currentPage.props || {}}
                                             {...{...jsonViewProps, oldValue: previousPage?.props || {}}}
                                         />
                                     }
                                     {activePageView === 'deferred' &&
-                                        <JsonView ref={jsonViewRef} value={getDeferredData()} {...jsonViewProps} />
+                                        <JsonView value={getDeferredData()} {...jsonViewProps} />
                                     }
                                 </div>
                             </div>
@@ -725,7 +697,7 @@ const Panel: React.FC = () => {
                                     ))}
                                 </div>
                             </div>
-                            <div className="w-2/3 flex-1 flex flex-col">
+                            <div className="w-2/3 flex-1 flex flex-col" ref={formsContainerRef}>
                                 {selectedRequest ? (
                                     (() => {
                                         const validationErrors = selectedRequest.errors || selectedRequest.props?.errors;
