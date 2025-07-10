@@ -74,6 +74,7 @@ const Panel: React.FC = () => {
     const [requests, setRequests] = useState<InertiaRequest[]>([]);
     const [selectedRequest, setSelectedRequest] = useState<InertiaRequest | null>(null);
     const [isInertiaDetected, setIsInertiaDetected] = useState(false);
+    const [framework, setFramework] = useState<{ name: string, version?: string } | null>(null);
     const [activeTab, setActiveTab] = useState('page');
     const [activePageView, setActivePageView] = useState('props');
     const [settings, setSettings] = useState<PanelSettings>(defaultSettings);
@@ -200,6 +201,7 @@ const Panel: React.FC = () => {
             chrome.storage.local.get([detectedKey, pageKey, requestsKey], (result) => {
                 if (result[detectedKey]?.detected) {
                     setIsInertiaDetected(true);
+                    setFramework(result[detectedKey]?.framework);
                 }
                 if (result[pageKey]?.page) {
                     setCurrentPage(result[pageKey].page);
@@ -217,6 +219,7 @@ const Panel: React.FC = () => {
 
             if (changes[detectedKey]) {
                 setIsInertiaDetected(changes[detectedKey].newValue?.detected);
+                setFramework(changes[detectedKey].newValue?.framework);
             }
             if (changes[pageKey]) {
                 setCurrentPage(prev => {
@@ -425,45 +428,45 @@ const Panel: React.FC = () => {
                                         <p className="text-sm text-slate-600 dark:text-github-dark-text-secondary">{requests.length} requests</p>
                                     </div>
                                     <button onClick={handleClear} className="px-2 py-1 text-xs rounded bg-red-700 text-gray-100">Clear</button>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                    {requests.map((request) => (
-                        <div
-                            key={request.id}
+                                </div>
+                                <div className="flex-1 overflow-y-auto">
+                                    {requests.map((request) => (
+                                        <div
+                                            key={request.id}
                                             className={`p-3 border-b dark:border-github-dark-border cursor-pointer dark:hover:bg-slate-700 border-l-4 ${
                                                 selectedRequest?.id === request.id ? 'border-sky-500' :
                                                 request.status === 'success' ? 'border-green-500' :
                                                 request.status === 'error' ? 'border-red-500' :
                                                 'border-transparent'
-                            }`}
-                            onClick={() => setSelectedRequest(request)}
-                        >
-                            <div className="flex items-center justify-between">
+                                            }`}
+                                            onClick={() => setSelectedRequest(request)}
+                                        >
+                                            <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-2">
                                                     <span className="font-mono text-sm dark:text-github-dark-text-secondary">
-                                    {request.method}
-                                </span>
+                                                        {request.method}
+                                                    </span>
                                                     {request.isRedirect && <span className="text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 px-1.5 py-0.5 rounded-full">REDIRECT</span>}
                                                     {request.visitType === 'initial' && <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-1.5 py-0.5 rounded-full">INITIAL</span>}
                                                 </div>
                                                 <span className="text-xs dark:text-github-dark-text-secondary">
-                                    {new Date(request.timestamp).toLocaleTimeString()}
-                                </span>
-                            </div>
+                                                    {new Date(request.timestamp).toLocaleTimeString()}
+                                                </span>
+                                            </div>
                                             <div className="text-sm font-medium dark:text-github-dark-text mt-1">
                                                 {request.component || 'Unknown'}
-                            </div>
+                                            </div>
                                             <div className="text-xs dark:text-github-dark-text-secondary truncate">
-                                {request.url}
+                                                {request.url}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
                             <div className="w-2/3 flex-1 flex flex-col">
                                 {selectedRequest ? (
                                     <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                                         <div>
+                                        <div>
                                             <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Request Details</h3>
                                             <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
                                                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -479,7 +482,7 @@ const Panel: React.FC = () => {
                                                         <span className="font-medium dark:text-github-dark-text-secondary">URL:</span>
                                                         <span className="ml-2 dark:text-github-dark-text">{selectedRequest.url}</span>
                                                     </div>
-                                                     <div>
+                                                    <div>
                                                         <span className="font-medium dark:text-github-dark-text-secondary">Component:</span>
                                                         <span className="ml-2 font-mono dark:text-github-dark-text">{selectedRequest.component}</span>
                                                     </div>
@@ -540,7 +543,7 @@ const Panel: React.FC = () => {
                                         <div>
                                             <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Props</h3>
                                             <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
-                                                 <Toolbar
+                                                <Toolbar
                                                     onSearch={setHighlightSearch}
                                                     onKeyDown={handleSearchKeyDown}
                                                     onToggleCollapse={handleToggleCollapse}
@@ -564,9 +567,9 @@ const Panel: React.FC = () => {
                                     </div>
                                 )}
                             </div>
-                </div>
+                        </div>
                     )}
-                    {activeTab === 'page' && (
+                    {activeTab === 'page' && currentPage && (
                         <div>
                             <div className="mb-6 p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
                                 <h3 className="text-lg font-semibold dark:text-github-dark-text mb-2">Current Page</h3>
@@ -583,6 +586,12 @@ const Panel: React.FC = () => {
                                         <div>
                                             <span className="font-medium dark:text-github-dark-text-secondary">Version:</span>
                                             <span className="ml-2 font-mono dark:text-github-dark-text">{currentPage.version}</span>
+                                        </div>
+                                    )}
+                                    {framework && (
+                                        <div>
+                                            <span className="font-medium dark:text-github-dark-text-secondary">Framework:</span>
+                                            <span className="ml-2 font-mono dark:text-github-dark-text">{framework.name} {framework.version}</span>
                                         </div>
                                     )}
                                 </div>
@@ -667,9 +676,9 @@ const Panel: React.FC = () => {
                                             <div className="text-sm font-medium dark:text-github-dark-text mt-1">
                                                 {request.component || 'Unknown'}
                                             </div>
-                                            <div className="text-xs dark:text-github-dark-text-secondary truncate">
-                                                {request.url}
-                                            </div>
+											<div className="text-xs dark:text-github-dark-text-secondary truncate">
+												{request.url}
+											</div>
                                         </div>
                                     ))}
                                 </div>
@@ -680,7 +689,7 @@ const Panel: React.FC = () => {
                                         const validationErrors = selectedRequest.errors || selectedRequest.props?.errors;
                                         return (
                                             <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                                                {selectedRequest.data && Object.keys(selectedRequest.data).length > 0 && (
+                                                {selectedRequest.data && (
                                                     <div>
                                                         <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Form Data</h3>
                                                         <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
@@ -698,28 +707,25 @@ const Panel: React.FC = () => {
                                                         </div>
                                                     </div>
                                                 )}
-                                                {validationErrors && Object.keys(validationErrors).length > 0 && (
+                                                {validationErrors && (
                                                     <div>
                                                         <h3 className="text-lg font-semibold text-red-600 mb-3">Validation Errors</h3>
                                                         <div className="border border-red-300 dark:border-red-700 rounded-lg overflow-hidden">
-                                                            <JsonView value={validationErrors} {...jsonViewProps} />
+                                                            <JsonView
+                                                                value={validationErrors}
+                                                                displayDataTypes={false}
+                                                                enableClipboard={true}
+                                                                style={{ padding: '12px' }}
+                                                            />
                                                         </div>
                                                     </div>
                                                 )}
-                                                <div>
-                                                    <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">CSRF Token</h3>
-                                                    <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg text-sm">
-                                                        <span className="font-mono dark:text-github-dark-text break-all">
-                                                            {selectedRequest.headers['x-csrf-token'] || 'Not found'}
-                                                        </span>
-                                                    </div>
-                                                </div>
                                             </div>
                                         )
                                     })()
                                 ) : (
                                     <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-github-dark-text-secondary">
-                                        Select a form submission to view details.
+                                        Select a submission from the timeline to view details.
                                     </div>
                                 )}
                             </div>
@@ -747,40 +753,48 @@ const Panel: React.FC = () => {
                                         );
                                     })
                                     .map(([name, route]: [string, any]) => (
-                                    <div key={name} className="p-4 border-b dark:border-github-dark-border">
-                                        <div className="font-semibold text-lg dark:text-github-dark-text mb-3">{name}</div>
-                                        <div className="grid grid-cols-[100px_1fr] gap-x-4 gap-y-2 text-sm">
-                                            <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">URI</div>
-                                            <div className="font-mono text-slate-800 dark:text-github-dark-text break-all">{route.uri}</div>
+                                        <div key={name} className="p-4 border-b dark:border-github-dark-border">
+                                            <div className="font-semibold text-lg dark:text-github-dark-text mb-3">{name}</div>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">URI</div>
+                                                    <div className="font-mono text-slate-800 dark:text-github-dark-text">{route.uri}</div>
+                                                </div>
 
-                                            <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Methods</div>
-                                            <div className="flex items-center space-x-2">
-                                                {route.methods.map((method: string) => (
-                                                    <span key={method} className={`px-2 py-0.5 text-xs font-semibold rounded
-                                                        ${method === 'GET' ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100' : ''}
-                                                        ${method === 'POST' ? 'bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100' : ''}
-                                                        ${method === 'PUT' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100' : ''}
-                                                        ${method === 'PATCH' ? 'bg-orange-100 text-orange-800 dark:bg-orange-700 dark:text-orange-100' : ''}
-                                                        ${method === 'DELETE' ? 'bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100' : ''}
-                                                        ${method === 'HEAD' ? 'bg-slate-200 text-slate-800 dark:bg-slate-600 dark:text-slate-100' : ''}
-                                                    `}>
-                                                        {method}
-                                                    </span>
-                                                ))}
-                                            </div>
+                                                <div>
+                                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Methods</div>
+                                                    <div className="flex space-x-2">
+                                                        {route.methods.map((method: string) => (
+                                                            <span key={method} className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                                                method === 'GET' ? 'bg-green-100 text-green-800' :
+                                                                method === 'POST' ? 'bg-blue-100 text-blue-800' :
+                                                                method === 'PUT' || method === 'PATCH' ? 'bg-yellow-100 text-yellow-800' :
+                                                                method === 'DELETE' ? 'bg-red-100 text-red-800' :
+                                                                'bg-gray-100 text-gray-800'
+                                                            }`}>
+                                                                {method}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
 
-                                            <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Bindings</div>
-                                            <div className="font-mono text-slate-800 dark:text-github-dark-text">
-                                                {route.bindings && Object.keys(route.bindings).length > 0 ? JSON.stringify(route.bindings) : 'none'}
-                                            </div>
+                                                <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Middleware</div>
+                                                <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                                    {route.middleware && route.middleware.length > 0 ? route.middleware.join(', ') : 'none'}
+                                                </div>
 
-                                            <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Wheres</div>
-                                            <div className="font-mono text-slate-800 dark:text-github-dark-text">
-                                                {route.wheres && Object.keys(route.wheres).length > 0 ? JSON.stringify(route.wheres) : 'none'}
+                                                <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Bindings</div>
+                                                <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                                    {route.bindings && Object.keys(route.bindings).length > 0 ? JSON.stringify(route.bindings) : 'none'}
+                                                </div>
+
+                                                <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Wheres</div>
+                                                <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                                    {route.wheres && Object.keys(route.wheres).length > 0 ? JSON.stringify(route.wheres) : 'none'}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
                             </div>
                         </div>
                     )}
