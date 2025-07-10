@@ -1,5 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import JsonView from '@uiw/react-json-view';
+import { lightTheme } from '@uiw/react-json-view/light';
+import { darkTheme } from '@uiw/react-json-view/dark';
+import { nordTheme } from '@uiw/react-json-view/nord';
+import { githubLightTheme } from '@uiw/react-json-view/githubLight';
+import { githubDarkTheme } from '@uiw/react-json-view/githubDark';
+import { vscodeTheme } from '@uiw/react-json-view/vscode';
+import { gruvboxTheme } from '@uiw/react-json-view/gruvbox';
+import { monokaiTheme } from '@uiw/react-json-view/monokai';
+import { basicTheme } from '@uiw/react-json-view/basic';
+import Settings from './Settings';
+import type { PanelSettings, JsonViewSettings } from './Settings';
+
+const themes = {
+    lightTheme,
+    darkTheme,
+    nordTheme,
+    githubLightTheme,
+    githubDarkTheme,
+    vscodeTheme,
+    gruvboxTheme,
+    monokaiTheme,
+    basicTheme
+};
 
 interface InertiaPage {
     component: string;
@@ -7,6 +30,25 @@ interface InertiaPage {
     url: string;
     version: string | null;
 }
+
+const defaultJsonViewSettings: JsonViewSettings = {
+    objectSortKeys: false,
+    indentWidth: 2,
+    displayObjectSize: true,
+    displayDataTypes: true,
+    enableClipboard: true,
+    collapsed: 1,
+    highlightUpdates: true,
+    shortenTextAfterLength: 30,
+    theme: 'githubLight',
+    fontSize: 13,
+};
+
+const defaultSettings: PanelSettings = {
+    appTheme: 'system',
+    showRequestHistory: true,
+    jsonView: defaultJsonViewSettings,
+};
 
 interface InertiaRequest {
     id: string;
@@ -26,6 +68,8 @@ const Panel: React.FC = () => {
     const [isInertiaDetected, setIsInertiaDetected] = useState(false);
     const [sortOrder, setSortOrder] = useState('desc');
     const [activeTab, setActiveTab] = useState('currentPage');
+    const [settings, setSettings] = useState<PanelSettings>(defaultSettings);
+    const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light');
     const tabId = chrome.devtools.inspectedWindow.tabId;
 
     const handleClear = () => {
@@ -36,6 +80,38 @@ const Panel: React.FC = () => {
             tabId: tabId,
         });
     };
+
+    useEffect(() => {
+        const settingsKey = `inertia-settings-${tabId}`;
+        chrome.storage.local.get(settingsKey, (result) => {
+            if (result[settingsKey]?.settings) {
+                setSettings({ ...defaultSettings, ...result[settingsKey].settings });
+            }
+        });
+    }, [tabId]);
+
+    const handleSettingsChange = (newSettings: PanelSettings) => {
+        setSettings(newSettings);
+        const settingsKey = `inertia-settings-${tabId}`;
+        chrome.storage.local.set({ [settingsKey]: { settings: newSettings } });
+    };
+
+    useEffect(() => {
+        if (settings.appTheme === 'system') {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            setEffectiveTheme(mediaQuery.matches ? 'dark' : 'light');
+
+            const handler = (e: MediaQueryListEvent) => {
+                setEffectiveTheme(e.matches ? 'dark' : 'light');
+            };
+
+            mediaQuery.addEventListener('change', handler);
+
+            return () => mediaQuery.removeEventListener('change', handler);
+        } else {
+            setEffectiveTheme(settings.appTheme);
+        }
+    }, [settings.appTheme]);
 
     useEffect(() => {
         const detectedKey = `inertia-detected-${tabId}`;
@@ -79,6 +155,16 @@ const Panel: React.FC = () => {
         };
     }, [tabId]);
 
+    const jsonViewProps = {
+        ...settings.jsonView,
+        style: {
+            ...themes[settings.jsonView.theme as keyof typeof themes],
+            fontSize: `${settings.jsonView.fontSize}px`,
+            padding: '12px',
+            lineHeight: '1.4',
+        }
+    };
+
     if (!isInertiaDetected) {
         return (
             <div className="flex items-center justify-center h-full bg-gray-50">
@@ -96,82 +182,89 @@ const Panel: React.FC = () => {
     }
 
     return (
-        <div className="flex h-full bg-white">
-            {/* Sidebar - Request History */}
-            <div className="w-1/3 border-r border-gray-200 flex flex-col">
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="font-semibold text-gray-800">Request History</h3>
-                            <p className="text-sm text-gray-600">{requests.length} requests</p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <button onClick={() => setSortOrder('desc')} className={`px-2 py-1 text-xs rounded ${sortOrder === 'desc' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>Newest</button>
-                            <button onClick={() => setSortOrder('asc')} className={`px-2 py-1 text-xs rounded ${sortOrder === 'asc' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>Oldest</button>
-                            <button onClick={handleClear} className="px-2 py-1 text-xs rounded bg-red-500 text-white">Clear</button>
+        <div className={`flex h-full bg-white ${effectiveTheme === 'dark' ? 'dark bg-github-dark-bg text-github-dark-text' : ''}`}>
+            {settings.showRequestHistory && (
+                <div className="w-1/3 border-r dark:border-github-dark-border flex flex-col bg-white dark:bg-github-dark-bg-secondary">
+                    <div className="p-4 border-b dark:border-github-dark-border bg-slate-50 dark:bg-github-dark-bg">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="font-semibold dark:text-github-dark-text">Request History</h3>
+                                <p className="text-sm text-slate-600 dark:text-github-dark-text-secondary">{requests.length} requests</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <button onClick={() => setSortOrder('desc')} className={`px-2 py-1 text-xs rounded ${sortOrder === 'desc' ? 'bg-sky-700 text-gray-100' : 'bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text'}`}>Newest</button>
+                                <button onClick={() => setSortOrder('asc')} className={`px-2 py-1 text-xs rounded ${sortOrder === 'asc' ? 'bg-sky-700 text-gray-100' : 'bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text'}`}>Oldest</button>
+                                <button onClick={handleClear} className="px-2 py-1 text-xs rounded bg-red-700 text-gray-100">Clear</button>
+                            </div>
                         </div>
                     </div>
+                    <div className="flex-1 overflow-y-auto">
+                        {requests
+                            .slice()
+                            .sort((a, b) => {
+                                if (sortOrder === 'asc') {
+                                    return a.timestamp - b.timestamp;
+                                }
+                                return b.timestamp - a.timestamp;
+                            })
+                            .map((request) => (
+                                <div
+                                    key={request.id}
+                                    className={`p-3 border-b dark:border-github-dark-border cursor-pointer dark:hover:bg-slate-700 border-l-2 ${
+                                        selectedRequest?.id === request.id ? 'border-blue-500' : 'border-transparent'
+                                    }`}
+                                    onClick={() => setSelectedRequest(request)}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-mono text-sm dark:text-github-dark-text-secondary">
+                                            {request.method}
+                                        </span>
+                                        <span className="text-xs dark:text-github-dark-text-secondary">
+                                            {new Date(request.timestamp).toLocaleTimeString()}
+                                        </span>
+                                    </div>
+                                    <div className="text-sm font-medium dark:text-github-dark-text mt-1">
+                                        {request.component}
+                                    </div>
+                                    <div className="text-xs dark:text-github-dark-text-secondary truncate">
+                                        {request.url}
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
                 </div>
-                <div className="flex-1 overflow-y-auto">
-                    {requests
-                        .slice() // Create a shallow copy to avoid mutating the original array
-                        .sort((a, b) => {
-                            if (sortOrder === 'asc') {
-                                return a.timestamp - b.timestamp;
-                            }
-                            return b.timestamp - a.timestamp;
-                        })
-                        .map((request) => (
-                        <div
-                            key={request.id}
-                            className={`p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-                                selectedRequest?.id === request.id ? 'bg-blue-50 border-blue-200' : ''
-                            }`}
-                            onClick={() => setSelectedRequest(request)}
-                        >
-                            <div className="flex items-center justify-between">
-                                <span className="font-mono text-sm text-gray-600">
-                                    {request.method}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                    {new Date(request.timestamp).toLocaleTimeString()}
-                                </span>
-                            </div>
-                            <div className="text-sm font-medium text-gray-800 mt-1">
-                                {request.component}
-                            </div>
-                            <div className="text-xs text-gray-500 truncate">
-                                {request.url}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col">
-                {/* Tab Navigation */}
-                <div className="border-b border-gray-200 bg-gray-50">
-                    <nav className="flex space-x-8 px-4">
+            )}
+            <div className="flex-1 flex flex-col bg-white dark:bg-github-dark-bg">
+                <div className="border-b dark:border-github-dark-border bg-slate-50 dark:bg-github-dark-bg-secondary">
+                    <nav className="flex items-center space-x-8 px-4">
                         <button
                             onClick={() => setActiveTab('currentPage')}
                             className={`py-2 px-1 border-b-2 font-medium text-sm ${
                                 activeTab === 'currentPage'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    ? 'border-sky-600 text-sky-600'
+                                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-github-dark-text-secondary dark:hover:text-github-dark-text'
                             }`}
                         >
-                            Current Page
+                            Current page
                         </button>
                         <button
                             onClick={() => setActiveTab('requestDetails')}
                             className={`py-2 px-1 border-b-2 font-medium text-sm ${
                                 activeTab === 'requestDetails'
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                                    ? 'border-sky-600 text-sky-600'
+                                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-github-dark-text-secondary dark:hover:text-github-dark-text'
                             }`}
                         >
-                            Request Details
+                            Request details
+                        </button>
+                        <div className="flex-1" />
+                        <button
+                            onClick={() => setActiveTab('settings')}
+                            className={`p-2 rounded-full text-slate-500 dark:text-github-dark-text-secondary hover:bg-slate-200 dark:hover:bg-github-dark-button-hover-bg ${
+                                activeTab === 'settings' ? 'bg-slate-200 dark:bg-github-dark-button-hover-bg' : ''
+                            }`}
+                        >
+                            ⚙️
                         </button>
                     </nav>
                 </div>
@@ -181,21 +274,21 @@ const Panel: React.FC = () => {
                     {activeTab === 'currentPage' && currentPage && (
                         <div>
                             {/* Page Info */}
-                            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-2">Current Page</h3>
+                            <div className="mb-6 p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
+                                <h3 className="text-lg font-semibold dark:text-github-dark-text mb-2">Current Page</h3>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <span className="font-medium text-gray-600">Component:</span>
-                                        <span className="ml-2 font-mono text-gray-800">{currentPage.component}</span>
+                                        <span className="font-medium dark:text-github-dark-text-secondary">Component:</span>
+                                        <span className="ml-2 font-mono dark:text-github-dark-text">{currentPage.component}</span>
                                     </div>
                                     <div>
-                                        <span className="font-medium text-gray-600">URL:</span>
-                                        <span className="ml-2 text-gray-800">{currentPage.url}</span>
+                                        <span className="font-medium dark:text-github-dark-text-secondary">URL:</span>
+                                        <span className="ml-2 dark:text-github-dark-text">{currentPage.url}</span>
                                     </div>
                                     {currentPage.version && (
                                         <div>
-                                            <span className="font-medium text-gray-600">Version:</span>
-                                            <span className="ml-2 font-mono text-gray-800">{currentPage.version}</span>
+                                            <span className="font-medium dark:text-github-dark-text-secondary">Version:</span>
+                                            <span className="ml-2 font-mono dark:text-github-dark-text">{currentPage.version}</span>
                                         </div>
                                     )}
                                 </div>
@@ -203,20 +296,11 @@ const Panel: React.FC = () => {
 
                             {/* Props Inspector */}
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-800 mb-3">Page Props</h3>
-                                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Page Props</h3>
+                                <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
                                     <JsonView
                                         value={currentPage.props || {}}
-                                        indentWidth={2}
-                                        collapsed={1}
-                                        displayDataTypes={true}
-                                        displayObjectSize={true}
-                                        enableClipboard={true}
-                                        style={{
-                                            padding: '12px',
-                                            fontSize: '13px',
-                                            lineHeight: '1.4'
-                                        }}
+                                        {...jsonViewProps}
                                     />
                                 </div>
                             </div>
@@ -224,7 +308,7 @@ const Panel: React.FC = () => {
                     )}
                     {activeTab === 'currentPage' && !currentPage && (
                         <div className="text-center py-12">
-                            <div className="text-gray-400 text-lg">No page data available</div>
+                            <div className="text-slate-400 dark:text-github-dark-text-secondary text-lg">No page data available</div>
                         </div>
                     )}
                     {activeTab === 'requestDetails' && (
@@ -232,31 +316,31 @@ const Panel: React.FC = () => {
                             {selectedRequest ? (
                                 <div className="space-y-6">
                                     <div>
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-3">Request Details</h3>
-                                        <div className="p-4 bg-gray-50 rounded-lg">
+                                        <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Request Details</h3>
+                                        <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
                                             <div className="grid grid-cols-2 gap-4 text-sm">
                                                 <div>
-                                                    <span className="font-medium text-gray-600">Method:</span>
-                                                    <span className="ml-2 font-mono text-gray-800">{selectedRequest.method}</span>
+                                                    <span className="font-medium dark:text-github-dark-text-secondary">Method:</span>
+                                                    <span className="ml-2 font-mono dark:text-github-dark-text">{selectedRequest.method}</span>
                                                 </div>
                                                 <div>
-                                                    <span className="font-medium text-gray-600">URL:</span>
-                                                    <span className="ml-2 text-gray-800">{selectedRequest.url}</span>
+                                                    <span className="font-medium dark:text-github-dark-text-secondary">URL:</span>
+                                                    <span className="ml-2 dark:text-github-dark-text">{selectedRequest.url}</span>
                                                 </div>
                                                 <div>
-                                                    <span className="font-medium text-gray-600">Component:</span>
-                                                    <span className="ml-2 font-mono text-gray-800">{selectedRequest.component}</span>
+                                                    <span className="font-medium dark:text-github-dark-text-secondary">Component:</span>
+                                                    <span className="ml-2 font-mono dark:text-github-dark-text">{selectedRequest.component}</span>
                                                 </div>
                                                 <div>
-                                                    <span className="font-medium text-gray-600">Response time:</span>
-                                                    <span className="ml-2 text-gray-800">{selectedRequest.responseTime}ms</span>
+                                                    <span className="font-medium dark:text-github-dark-text-secondary">Response time:</span>
+                                                    <span className="ml-2 dark:text-github-dark-text">{selectedRequest.responseTime}ms</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-3">Headers</h3>
-                                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                        <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Headers</h3>
+                                        <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
                                             <JsonView
                                                 value={selectedRequest.headers || {}}
                                                 displayDataTypes={false}
@@ -266,30 +350,24 @@ const Panel: React.FC = () => {
                                         </div>
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-3">Props</h3>
-                                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                        <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Props</h3>
+                                        <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
                                             <JsonView
                                                 value={selectedRequest.props || {}}
-                                                indentWidth={2}
-                                                collapsed={1}
-                                                displayDataTypes={true}
-                                                displayObjectSize={true}
-                                                enableClipboard={true}
-                                                style={{
-                                                    padding: '12px',
-                                                    fontSize: '13px',
-                                                    lineHeight: '1.4'
-                                                }}
+                                                {...jsonViewProps}
                                             />
                                         </div>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="text-center py-12">
-                                    <div className="text-gray-400 text-lg">Select a request from the history to see details.</div>
+                                    <div className="text-slate-400 dark:text-github-dark-text-secondary text-lg">Select a request from the history to see details.</div>
                                 </div>
                             )}
                         </div>
+                    )}
+                    {activeTab === 'settings' && (
+                        <Settings settings={settings} onSettingsChange={handleSettingsChange} />
                     )}
                 </div>
             </div>
