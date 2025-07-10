@@ -1,3 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  @apply bg-white;
+}
+
+.w-rjv-inner mark {
+  @apply bg-yellow-300 px-1 rounded-sm;
+}
+.dark .w-rjv-inner mark {
+  @apply bg-yellow-500 text-black;
+}
+
+.w-rjv-inner mark.active-highlight {
+    @apply bg-orange-400;
+}
+
+.dark .w-rjv-inner mark.active-highlight {
+    @apply bg-orange-500;
+}
