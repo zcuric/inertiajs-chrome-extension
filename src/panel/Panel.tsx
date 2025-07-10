@@ -363,7 +363,7 @@ const Panel: React.FC = () => {
     return (
         <div className={`flex h-full bg-white ${effectiveTheme === 'dark' ? 'dark bg-github-dark-bg text-github-dark-text' : ''}`}>
             <div className="flex-1 flex flex-col bg-white dark:bg-github-dark-bg">
-                <div className="border-b dark:border-github-dark-border bg-slate-50 dark:bg-github-dark-bg-secondary">
+                <div className="border-b dark:border-github-dark-border bg-slate-50 dark:bg-github-dark-bg">
                     <nav className="flex items-center space-x-8 px-4">
                         <button
                             onClick={() => setActiveTab('page')}
@@ -755,17 +755,17 @@ const Panel: React.FC = () => {
                                     .map(([name, route]: [string, any]) => (
                                         <div key={name} className="p-4 border-b dark:border-github-dark-border">
                                             <div className="font-semibold text-lg dark:text-github-dark-text mb-3">{name}</div>
-                                            <div className="space-y-3">
-                                                <div>
-                                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">URI</div>
+                                            <div className="space-y-2">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">URI:</div>
                                                     <div className="font-mono text-slate-800 dark:text-github-dark-text">{route.uri}</div>
                                                 </div>
 
-                                                <div>
-                                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Methods</div>
-                                                    <div className="flex space-x-2">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Methods:</div>
+                                                    <div className="flex gap-1">
                                                         {route.methods.map((method: string) => (
-                                                            <span key={method} className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                                            <span key={method} className={`px-1 text-xs font-semibold rounded-sm ${
                                                                 method === 'GET' ? 'bg-green-100 text-green-800' :
                                                                 method === 'POST' ? 'bg-blue-100 text-blue-800' :
                                                                 method === 'PUT' || method === 'PATCH' ? 'bg-yellow-100 text-yellow-800' :
@@ -778,19 +778,25 @@ const Panel: React.FC = () => {
                                                     </div>
                                                 </div>
 
-                                                <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Middleware</div>
-                                                <div className="font-mono text-slate-800 dark:text-github-dark-text">
-                                                    {route.middleware && route.middleware.length > 0 ? route.middleware.join(', ') : 'none'}
+                                                <div className="flex items-center gap-2">
+                                                  <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Middleware:</div>
+                                                  <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                                      {route.middleware && route.middleware.length > 0 ? route.middleware.join(', ') : 'none'}
+                                                  </div>
                                                 </div>
 
-                                                <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Bindings</div>
-                                                <div className="font-mono text-slate-800 dark:text-github-dark-text">
-                                                    {route.bindings && Object.keys(route.bindings).length > 0 ? JSON.stringify(route.bindings) : 'none'}
+                                                <div className="flex items-center gap-2">
+                                                  <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Bindings:</div>
+                                                  <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                                      {route.bindings && Object.keys(route.bindings).length > 0 ? JSON.stringify(route.bindings) : 'none'}
+                                                  </div>
                                                 </div>
 
-                                                <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Wheres</div>
-                                                <div className="font-mono text-slate-800 dark:text-github-dark-text">
-                                                    {route.wheres && Object.keys(route.wheres).length > 0 ? JSON.stringify(route.wheres) : 'none'}
+                                                <div className="flex items-center gap-2">
+                                                  <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Wheres:</div>
+                                                  <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                                      {route.wheres && Object.keys(route.wheres).length > 0 ? JSON.stringify(route.wheres) : 'none'}
+                                                  </div>
                                                 </div>
                                             </div>
                                         </div>
