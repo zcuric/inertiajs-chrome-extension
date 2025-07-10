@@ -23,6 +23,7 @@ document.addEventListener("inertia:start", (event) => {
 		url: event.detail.visit.url.href,
 		component: null,
 		props: null,
+		data: event.detail.visit.data,
 		headers: event.detail.visit.headers,
 		responseTime: null,
 		status: "pending",

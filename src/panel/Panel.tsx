@@ -66,6 +66,7 @@ interface InertiaRequest {
     errors?: Record<string, string>;
     visitType: 'initial' | 'navigate';
     isRedirect: boolean;
+    data?: Record<string, any>;
 }
 
 const Panel: React.FC = () => {
@@ -78,6 +79,7 @@ const Panel: React.FC = () => {
     const [settings, setSettings] = useState<PanelSettings>(defaultSettings);
     const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light');
     const [highlightSearch, setHighlightSearch] = useState('');
+    const [routesSearch, setRoutesSearch] = useState('');
     const tabId = chrome.devtools.inspectedWindow.tabId;
     const jsonViewRef = useRef<HTMLDivElement>(null);
     const jsonViewRef2 = useRef<HTMLDivElement>(null);
@@ -380,6 +382,28 @@ const Panel: React.FC = () => {
                         >
                             Requests
                         </button>
+                        <button
+                            onClick={() => setActiveTab('forms')}
+                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                activeTab === 'forms'
+                                    ? 'border-sky-600 text-sky-600'
+                                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-github-dark-text-secondary dark:hover:text-github-dark-text'
+                            }`}
+                        >
+                            Forms
+                        </button>
+                        {currentPage?.props?.ziggy && (
+                            <button
+                                onClick={() => setActiveTab('routes')}
+                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeTab === 'routes'
+                                        ? 'border-sky-600 text-sky-600'
+                                        : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-github-dark-text-secondary dark:hover:text-github-dark-text'
+                                }`}
+                            >
+                                Routes
+                            </button>
+                        )}
                         <div className="flex-1" />
                         <button
                             onClick={() => setActiveTab('settings')}
@@ -613,6 +637,156 @@ const Panel: React.FC = () => {
                                         Select a request from the timeline to view details.
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+                    {activeTab === 'forms' && (
+                        <div className="flex h-full">
+                            <div className="w-1/3 border-r dark:border-github-dark-border flex flex-col">
+                                <div className="p-4 border-b dark:border-github-dark-border bg-slate-50 dark:bg-github-dark-bg flex items-center justify-between">
+                                    <div>
+                                        <h3 className="font-semibold dark:text-github-dark-text">Form Submissions</h3>
+                                        <p className="text-sm text-slate-600 dark:text-github-dark-text-secondary">{requests.filter(r => ['POST', 'PUT', 'PATCH'].includes(r.method)).length} submissions</p>
+                                    </div>
+                                    <button onClick={handleClear} className="px-2 py-1 text-xs rounded bg-red-700 text-gray-100">Clear</button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto">
+                                    {requests.filter(r => ['POST', 'PUT', 'PATCH'].includes(r.method)).map((request) => (
+                                        <div
+                                            key={request.id}
+                                            className={`p-3 border-b dark:border-github-dark-border cursor-pointer dark:hover:bg-slate-700 border-l-4 ${
+                                                selectedRequest?.id === request.id ? 'border-sky-500' :
+                                                request.status === 'success' ? 'border-green-500' :
+                                                request.status === 'error' ? 'border-red-500' :
+                                                'border-transparent'
+                                            }`}
+                                            onClick={() => setSelectedRequest(request)}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-mono text-sm dark:text-github-dark-text-secondary">
+                                                    {request.method}
+                                                </span>
+                                                <span className="text-xs dark:text-github-dark-text-secondary">
+                                                    {new Date(request.timestamp).toLocaleTimeString()}
+                                                </span>
+                                            </div>
+                                            <div className="text-sm font-medium dark:text-github-dark-text mt-1">
+                                                {request.component || 'Unknown'}
+                                            </div>
+                                            <div className="text-xs dark:text-github-dark-text-secondary truncate">
+                                                {request.url}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="w-2/3 flex-1 flex flex-col">
+                                {selectedRequest ? (
+                                    (() => {
+                                        const validationErrors = selectedRequest.errors || selectedRequest.props?.errors;
+                                        return (
+                                            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                                                {selectedRequest.data && Object.keys(selectedRequest.data).length > 0 && (
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Form Data</h3>
+                                                        <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
+                                                            <Toolbar
+                                                                onSearch={setHighlightSearch}
+                                                                onKeyDown={handleSearchKeyDown}
+                                                                onToggleCollapse={handleToggleCollapse}
+                                                                onIndentIncrease={() => handleIndentChange(1)}
+                                                                onIndentDecrease={() => handleIndentChange(-1)}
+                                                                onFontSizeIncrease={() => handleFontSizeChange(1)}
+                                                                onFontSizeDecrease={() => handleFontSizeChange(-1)}
+                                                                isCollapsed={settings.jsonView.collapsed !== false}
+                                                            />
+                                                            <JsonView value={selectedRequest.data} {...jsonViewProps} />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {validationErrors && Object.keys(validationErrors).length > 0 && (
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold text-red-600 mb-3">Validation Errors</h3>
+                                                        <div className="border border-red-300 dark:border-red-700 rounded-lg overflow-hidden">
+                                                            <JsonView value={validationErrors} {...jsonViewProps} />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">CSRF Token</h3>
+                                                    <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg text-sm">
+                                                        <span className="font-mono dark:text-github-dark-text break-all">
+                                                            {selectedRequest.headers['x-csrf-token'] || 'Not found'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })()
+                                ) : (
+                                    <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-github-dark-text-secondary">
+                                        Select a form submission to view details.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    {activeTab === 'routes' && currentPage?.props?.ziggy && (
+                        <div className="flex flex-col h-full">
+                            <div className="p-4 border-b dark:border-github-dark-border">
+                                <input
+                                    type="text"
+                                    placeholder="Search routes..."
+                                    value={routesSearch}
+                                    onChange={(e) => setRoutesSearch(e.target.value)}
+                                    className="w-full px-3 py-2 text-sm bg-slate-100 dark:bg-github-dark-button-bg dark:text-github-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                                />
+                            </div>
+                            <div className="flex-1 overflow-y-auto">
+                                {Object.entries(currentPage.props.ziggy.routes)
+                                    .filter(([name, route]: [string, any]) => {
+                                        if (!routesSearch) return true;
+                                        const searchTerm = routesSearch.toLowerCase();
+                                        return (
+                                            name.toLowerCase().includes(searchTerm) ||
+                                            route.uri.toLowerCase().includes(searchTerm)
+                                        );
+                                    })
+                                    .map(([name, route]: [string, any]) => (
+                                    <div key={name} className="p-4 border-b dark:border-github-dark-border">
+                                        <div className="font-semibold text-lg dark:text-github-dark-text mb-3">{name}</div>
+                                        <div className="grid grid-cols-[100px_1fr] gap-x-4 gap-y-2 text-sm">
+                                            <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">URI</div>
+                                            <div className="font-mono text-slate-800 dark:text-github-dark-text break-all">{route.uri}</div>
+
+                                            <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Methods</div>
+                                            <div className="flex items-center space-x-2">
+                                                {route.methods.map((method: string) => (
+                                                    <span key={method} className={`px-2 py-0.5 text-xs font-semibold rounded
+                                                        ${method === 'GET' ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100' : ''}
+                                                        ${method === 'POST' ? 'bg-blue-100 text-blue-800 dark:bg-blue-700 dark:text-blue-100' : ''}
+                                                        ${method === 'PUT' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100' : ''}
+                                                        ${method === 'PATCH' ? 'bg-orange-100 text-orange-800 dark:bg-orange-700 dark:text-orange-100' : ''}
+                                                        ${method === 'DELETE' ? 'bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100' : ''}
+                                                        ${method === 'HEAD' ? 'bg-slate-200 text-slate-800 dark:bg-slate-600 dark:text-slate-100' : ''}
+                                                    `}>
+                                                        {method}
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Bindings</div>
+                                            <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                                {route.bindings && Object.keys(route.bindings).length > 0 ? JSON.stringify(route.bindings) : 'none'}
+                                            </div>
+
+                                            <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Wheres</div>
+                                            <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                                {route.wheres && Object.keys(route.wheres).length > 0 ? JSON.stringify(route.wheres) : 'none'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
