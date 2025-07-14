@@ -8,27 +8,22 @@ const send = (message) => {
 const detectFramework = () => {
 	// Vue
 	if (window.__VUE__) {
-		console.log("Inertia DevTools: Detected Vue.js", window.__VUE__.version);
 		return { name: "Vue", version: window.__VUE__.version };
 	}
 	const vueApp = document.querySelector("[data-v-app]");
 	if (vueApp?.__vue_app__) {
-		console.log("Inertia DevTools: Detected Vue.js 3");
 		return { name: "Vue", version: vueApp.__vue_app__.version };
 	}
 
 	// React
 	if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
-		console.log("Inertia DevTools: Detected React.js via DevTools hook");
 		let version = null;
 		try {
 			const renderers = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.renderers;
 			const renderer = renderers.get(Array.from(renderers.keys())[0]);
 			version = renderer?.version;
 		} catch (e) {
-			console.log(
-				"Inertia DevTools: Could not determine React version from hook.",
-			);
+			console.error(e);
 		}
 		return { name: "React", version };
 	}
@@ -38,17 +33,14 @@ const detectFramework = () => {
 		rootEl &&
 		Object.keys(rootEl).some((key) => key.startsWith("__reactFiber"))
 	) {
-		console.log("Inertia DevTools: Detected React.js via fiber property");
 		return { name: "React" };
 	}
 
 	// Svelte
 	if (document.querySelector("[class*='svelte-']")) {
-		console.log("Inertia DevTools: Detected Svelte");
 		return { name: "Svelte" };
 	}
 
-	console.log("Inertia DevTools: Could not detect framework");
 	return null;
 };
 
