@@ -26,6 +26,8 @@ const ext = {
   css: ".css",
 };
 
+console.log("📦 Building with Bun...");
+
 await Bun.build({
   target: "browser",
   entrypoints: resolveEntryPoints([
@@ -36,6 +38,8 @@ await Bun.build({
   ]),
   outdir,
 });
+
+console.log("✅ Bun build complete!");
 
 // Process Tailwind CSS
 await $`tailwindcss -i ${publicFolder}/main.css -o ${outdir}/main.css --minify`;
