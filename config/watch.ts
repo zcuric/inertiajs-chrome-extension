@@ -7,20 +7,7 @@ import chalk from "chalk";
 import "./cwd";
 import { server, channel } from "./server";
 
-const {
-  values: { dir },
-} = parseArgs({
-  args: Bun.argv,
-  strict: true,
-  allowPositionals: true,
-  options: {
-    dir: {
-      type: "string",
-    },
-  },
-});
-
-const directoriesToWatch = dir?.split(",").map((dir) => `./${dir}`) || [];
+const directoriesToWatch = ["./src", "./public"];
 
 const runBuild = async () => $`bun run config/build-with-react-compiler.ts`;
 await runBuild();

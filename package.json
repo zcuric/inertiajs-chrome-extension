@@ -11,7 +11,7 @@
   "scripts": {
     "build": "bun run config/build-with-react-compiler.ts",
     "build:original": "bun run config/build.ts",
-    "dev": "bun run config/watch.ts --dir=src,public",
+    "dev": "bun run config/watch.ts",
     "pack": "bun run config/pack.ts",
     "css": "postcss"
   },
