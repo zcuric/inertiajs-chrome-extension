@@ -47,6 +47,17 @@ const Panel: React.FC = () => {
 		handleClear,
 	} = useInertiaData(tabId);
 
+	// Handle settings toggle functionality
+	const handleSettingsToggle = () => {
+		if (activeTab === TAB_NAMES.SETTINGS) {
+			// If already on settings, go back to PAGE tab
+			setActiveTab(TAB_NAMES.PAGE);
+		} else {
+			// If not on settings, switch to settings
+			setActiveTab(TAB_NAMES.SETTINGS);
+		}
+	};
+
 	if (isLoading) {
 		return (
 			<div
@@ -137,16 +148,39 @@ const Panel: React.FC = () => {
 							</button>
 						)}
 						<div className="flex-1" />
+						{/* Inertia.js Documentation Links */}
+						<a
+							href="https://inertiajs.com/"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-xs text-sky-600 hover:underline mr-2"
+						>
+							Inertia.js Documentation
+						</a>
 						<button
 							type="button"
-							onClick={() => setActiveTab(TAB_NAMES.SETTINGS)}
+							onClick={handleSettingsToggle}
 							className={`${CSS_CLASSES.BUTTON_SETTINGS} ${
 								activeTab === TAB_NAMES.SETTINGS
 									? "bg-slate-200 dark:bg-gray-700"
 									: ""
 							}`}
+							aria-label="Settings"
 						>
-							{EMOJIS.SETTINGS}
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="text-slate-500 dark:text-gray-400"
+								aria-hidden="true"
+							>
+								<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+							</svg>
 						</button>
 					</nav>
 				</div>

@@ -149,5 +149,5 @@ export const MESSAGES = {
 export const EMOJIS = {
 	LOADING: "⏳",
 	SEARCH: "🔍",
-	SETTINGS: "⚙️",
+	SETTINGS: "🔧",
 } as const;
