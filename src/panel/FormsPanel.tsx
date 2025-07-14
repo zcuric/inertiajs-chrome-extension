@@ -228,9 +228,9 @@ const FormsPanel: React.FC<FormsPanelProps> = ({
 
     return (
         <div className="flex h-full">
-            <div className="w-1/3 border-r dark:border-github-dark-border">
-                <div className="flex items-center justify-between p-4 border-b dark:border-github-dark-border">
-                    <h3 className="text-lg font-semibold dark:text-github-dark-text">Form Submissions</h3>
+            <div className="w-1/3 border-r dark:border-gray-700">
+                <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
+                    <h3 className="text-lg font-semibold dark:text-white">Form Submissions</h3>
                     <button
                         onClick={onClear}
                         className="px-3 py-1 text-xs bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-800 dark:text-red-200 rounded"
@@ -243,10 +243,10 @@ const FormsPanel: React.FC<FormsPanelProps> = ({
                         <div
                             key={request.timestamp}
                             onClick={() => onRequestSelect(request)}
-                            className={`p-3 border-b dark:border-github-dark-border cursor-pointer transition-colors ${
+                            className={`p-3 border-b dark:border-gray-700 cursor-pointer transition-colors ${
                                 selectedRequest === request
                                     ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-                                    : 'hover:bg-slate-50 dark:hover:bg-github-dark-bg-secondary'
+                                    : 'hover:bg-slate-50 dark:hover:bg-gray-800'
                             }`}
                         >
                             <div className="flex items-center justify-between">
@@ -257,14 +257,14 @@ const FormsPanel: React.FC<FormsPanelProps> = ({
                                     {request.status === 'error' && <span className="text-xs font-semibold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1.5 py-0.5 rounded-full">ERROR</span>}
                                     {request.isPartial && <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1.5 py-0.5 rounded-full">PARTIAL</span>}
                                 </div>
-                                <span className="text-xs dark:text-github-dark-text-secondary">
+                                <span className="text-xs dark:text-gray-400">
                                     {new Date(request.timestamp).toLocaleTimeString()}
                                 </span>
                             </div>
-                            <div className="text-sm font-medium dark:text-github-dark-text mt-1">
+                            <div className="text-sm font-medium dark:text-white mt-1">
                                 {request.component || 'Unknown'}
                             </div>
-                            <div className="text-xs dark:text-github-dark-text-secondary truncate">
+                            <div className="text-xs dark:text-gray-400 truncate">
                                 {request.url}
                             </div>
                         </div>
@@ -280,8 +280,8 @@ const FormsPanel: React.FC<FormsPanelProps> = ({
                             <div className="flex-1 overflow-y-auto p-4 space-y-6">
                                 {selectedRequest.data && (
                                     <div>
-                                        <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Form Data</h3>
-                                        <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
+                                        <h3 className="text-lg font-semibold dark:text-white mb-3">Form Data</h3>
+                                        <div className="border dark:border-gray-700 rounded-lg overflow-hidden">
                                             <Toolbar
                                                 onSearch={handleSearch}
                                                 onKeyDown={handleSearchKeyDown}
@@ -319,7 +319,7 @@ const FormsPanel: React.FC<FormsPanelProps> = ({
                         )
                     })()
                 ) : (
-                    <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-github-dark-text-secondary">
+                    <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-gray-400">
                         Select a submission from the timeline to view details.
                     </div>
                 )}

@@ -40,13 +40,13 @@ const Panel: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className={`${CSS_CLASSES.CENTER_CONTAINER} ${effectiveTheme === 'dark' ? CSS_CLASSES.LOADING_BG_DARK : CSS_CLASSES.LOADING_BG_LIGHT}`}>
+            <div className={`${CSS_CLASSES.CENTER_CONTAINER} ${effectiveTheme === 'dark' ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
                 <div className="text-center p-8">
                     <div className="text-4xl mb-4 animate-pulse">{EMOJIS.LOADING}</div>
-                    <h2 className="text-xl font-semibold text-gray-700 dark:text-github-dark-text mb-2">
+                    <h2 className="text-xl font-semibold text-gray-700 dark:text-white mb-2">
                         {MESSAGES.LOADING_TITLE}
                     </h2>
-                    <p className="text-gray-500 dark:text-github-dark-text-secondary">
+                    <p className="text-gray-500 dark:text-gray-400">
                         {MESSAGES.LOADING_SUBTITLE}
                     </p>
                 </div>
@@ -56,13 +56,13 @@ const Panel: React.FC = () => {
 
     if (!isInertiaDetected) {
         return (
-            <div className={`${CSS_CLASSES.CENTER_CONTAINER} ${effectiveTheme === 'dark' ? CSS_CLASSES.LOADING_BG_DARK : CSS_CLASSES.LOADING_BG_LIGHT}`}>
+            <div className={`${CSS_CLASSES.CENTER_CONTAINER} ${effectiveTheme === 'dark' ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
                 <div className="text-center p-8">
                     <div className="text-6xl mb-4">{EMOJIS.SEARCH}</div>
-                    <h2 className="text-xl font-semibold text-gray-700 dark:text-github-dark-text mb-2">
+                    <h2 className="text-xl font-semibold text-gray-700 dark:text-white mb-2">
                         {MESSAGES.NOT_DETECTED_TITLE}
                     </h2>
-                    <p className="text-gray-500 dark:text-github-dark-text-secondary">
+                    <p className="text-gray-500 dark:text-gray-400">
                         {MESSAGES.NOT_DETECTED_SUBTITLE}
                     </p>
                 </div>
@@ -71,13 +71,13 @@ const Panel: React.FC = () => {
     }
 
     return (
-        <div className={`flex h-full bg-white ${effectiveTheme === 'dark' ? 'dark bg-github-dark-bg text-github-dark-text' : ''}`}>
-            <div className="flex-1 flex flex-col bg-white dark:bg-github-dark-bg">
-                <div className="border-b dark:border-github-dark-border bg-slate-50 dark:bg-github-dark-bg">
+        <div className={`flex h-full ${effectiveTheme === 'dark' ? 'dark bg-gray-900 text-white' : 'bg-white'}`}>
+            <div className="flex-1 flex flex-col bg-white dark:bg-gray-900">
+                <div className="border-b dark:border-gray-700 bg-slate-50 dark:bg-gray-900">
                     <nav className="flex items-center space-x-8 px-4">
                         <button
                             onClick={() => setActiveTab(TAB_NAMES.PAGE)}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                            className={`py-2 px-1 font-medium text-sm transition-colors ${
                                 activeTab === TAB_NAMES.PAGE
                                     ? CSS_CLASSES.TAB_ACTIVE
                                     : CSS_CLASSES.TAB_INACTIVE
@@ -87,7 +87,7 @@ const Panel: React.FC = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab(TAB_NAMES.REQUESTS)}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                            className={`py-2 px-1 font-medium text-sm transition-colors ${
                                 activeTab === TAB_NAMES.REQUESTS
                                     ? CSS_CLASSES.TAB_ACTIVE
                                     : CSS_CLASSES.TAB_INACTIVE
@@ -97,7 +97,7 @@ const Panel: React.FC = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab(TAB_NAMES.FORMS)}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                            className={`py-2 px-1 font-medium text-sm transition-colors ${
                                 activeTab === TAB_NAMES.FORMS
                                     ? CSS_CLASSES.TAB_ACTIVE
                                     : CSS_CLASSES.TAB_INACTIVE
@@ -108,7 +108,7 @@ const Panel: React.FC = () => {
                         {currentPage?.props?.ziggy && (
                             <button
                                 onClick={() => setActiveTab(TAB_NAMES.ROUTES)}
-                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                className={`py-2 px-1 font-medium text-sm transition-colors ${
                                     activeTab === TAB_NAMES.ROUTES
                                         ? CSS_CLASSES.TAB_ACTIVE
                                         : CSS_CLASSES.TAB_INACTIVE
@@ -121,7 +121,7 @@ const Panel: React.FC = () => {
                         <button
                             onClick={() => setActiveTab(TAB_NAMES.SETTINGS)}
                             className={`${CSS_CLASSES.BUTTON_SETTINGS} ${
-                                activeTab === TAB_NAMES.SETTINGS ? 'bg-slate-200 dark:bg-github-dark-button-hover-bg' : ''
+                                activeTab === TAB_NAMES.SETTINGS ? 'bg-slate-200 dark:bg-gray-700' : ''
                             }`}
                         >
                             {EMOJIS.SETTINGS}

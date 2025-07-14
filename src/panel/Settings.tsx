@@ -57,28 +57,28 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
     return (
         <div className="p-4 space-y-6">
             <div>
-                <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Appearance</h3>
-                <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg space-y-4">
+                <h3 className="text-lg font-semibold dark:text-white mb-3">Appearance</h3>
+                <div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-lg space-y-4">
                     <div className="flex items-center justify-between text-sm">
                         <div>
-                            <span className="font-medium dark:text-github-dark-text-secondary">Theme</span>
+                            <span className="font-medium dark:text-gray-400">Theme</span>
                         </div>
                         <div className="flex items-center space-x-2">
                             <button
                                 onClick={() => setAppTheme('light')}
-                                className={`px-3 py-1 text-xs rounded ${settings.appTheme === 'light' ? 'bg-sky-700 text-gray-100' : 'bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text'}`}
+                                className={`px-3 py-1 text-xs rounded ${settings.appTheme === 'light' ? 'bg-sky-700 text-gray-100' : 'bg-slate-200 dark:bg-gray-800 dark:text-white'}`}
                             >
                                 Light
                             </button>
                             <button
                                 onClick={() => setAppTheme('dark')}
-                                className={`px-3 py-1 text-xs rounded ${settings.appTheme === 'dark' ? 'bg-sky-700 text-gray-100' : 'bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text'}`}
+                                className={`px-3 py-1 text-xs rounded ${settings.appTheme === 'dark' ? 'bg-sky-700 text-gray-100' : 'bg-slate-200 dark:bg-gray-800 dark:text-white'}`}
                             >
                                 Dark
                             </button>
                             <button
                                 onClick={() => setAppTheme('system')}
-                                className={`px-3 py-1 text-xs rounded ${settings.appTheme === 'system' ? 'bg-sky-700 text-gray-100' : 'bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text'}`}
+                                className={`px-3 py-1 text-xs rounded ${settings.appTheme === 'system' ? 'bg-sky-700 text-gray-100' : 'bg-slate-200 dark:bg-gray-700 dark:text-white'}`}
                             >
                                 System
                             </button>
@@ -87,48 +87,48 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
                 </div>
             </div>
             <div>
-                <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">JSON Viewer</h3>
-                <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg grid grid-cols-2 gap-4">
+                <h3 className="text-lg font-semibold dark:text-white mb-3">JSON Viewer</h3>
+                <div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-lg grid grid-cols-2 gap-4">
                     <div className="text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Theme</label>
+                        <label className="font-medium dark:text-gray-400">Theme</label>
                         <select
                             value={settings.jsonView.theme}
                             onChange={(e) => handleJsonViewChange('theme', e.target.value)}
-                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
+                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-gray-700 dark:text-white"
                         >
                             {Object.entries(themeOptions).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                         </select>
                     </div>
                     <div className="text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Font Size</label>
+                        <label className="font-medium dark:text-gray-400">Font Size</label>
                         <input
                             type="number"
                             value={settings.jsonView.fontSize}
                             onChange={(e) => handleJsonViewChange('fontSize', parseInt(e.target.value, 10))}
-                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
+                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
                     <div className="text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Indent Width</label>
+                        <label className="font-medium dark:text-gray-400">Indent Width</label>
                         <input
                             type="number"
                             value={settings.jsonView.indentWidth}
                             onChange={(e) => handleJsonViewChange('indentWidth', parseInt(e.target.value, 10))}
-                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
+                            className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
                     <div className="text-sm">
-                        <label className="font-medium dark:text-github-dark-text-secondary">Collapsed</label>
+                        <label className="font-medium dark:text-gray-400">Collapsed</label>
                         <input
                             type="number"
                             value={typeof settings.jsonView.collapsed === 'number' ? settings.jsonView.collapsed : 1}
                             onChange={(e) => handleJsonViewChange('collapsed', parseInt(e.target.value, 10))}
-                             className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text"
+                             className="w-full mt-1 px-2 py-1 text-xs rounded bg-slate-200 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
                     <div className="col-span-2 grid grid-cols-2 gap-4">
                         <div className="flex items-center justify-between text-sm">
-                            <label className="font-medium dark:text-github-dark-text-secondary">Display Object Size</label>
+                            <label className="font-medium dark:text-gray-400">Display Object Size</label>
                             <input
                                 type="checkbox"
                                 checked={settings.jsonView.displayObjectSize}
@@ -136,7 +136,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
                             />
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                            <label className="font-medium dark:text-github-dark-text-secondary">Display Data Types</label>
+                            <label className="font-medium dark:text-gray-400">Display Data Types</label>
                             <input
                                 type="checkbox"
                                 checked={settings.jsonView.displayDataTypes}
@@ -144,7 +144,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
                             />
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                            <label className="font-medium dark:text-github-dark-text-secondary">Enable Clipboard</label>
+                            <label className="font-medium dark:text-gray-400">Enable Clipboard</label>
                             <input
                                 type="checkbox"
                                 checked={settings.jsonView.enableClipboard}
@@ -152,7 +152,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
                             />
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                            <label className="font-medium dark:text-github-dark-text-secondary">Sort Object Keys</label>
+                            <label className="font-medium dark:text-gray-400">Sort Object Keys</label>
                             <input
                                 type="checkbox"
                                 checked={settings.jsonView.objectSortKeys}
@@ -160,7 +160,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
                             />
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                            <label className="font-medium dark:text-github-dark-text-secondary">Quotes on Keys</label>
+                            <label className="font-medium dark:text-gray-400">Quotes on Keys</label>
                             <input
                                 type="checkbox"
                                 checked={settings.jsonView.quotesOnKeys}
@@ -168,7 +168,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
                             />
                         </div>
                          <div className="flex items-center justify-between text-sm">
-                            <label className="font-medium dark:text-github-dark-text-secondary">Highlight Updates</label>
+                            <label className="font-medium dark:text-gray-400">Highlight Updates</label>
                             <input
                                 type="checkbox"
                                 checked={settings.jsonView.highlightUpdates}

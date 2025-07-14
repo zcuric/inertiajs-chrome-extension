@@ -10,7 +10,7 @@ const RoutesPanel: React.FC<RoutesPanelProps> = ({ currentPage }) => {
 
     if (!currentPage?.props?.ziggy) {
         return (
-            <div className="flex items-center justify-center h-full text-slate-500 dark:text-github-dark-text-secondary">
+            <div className="flex items-center justify-center h-full text-slate-500 dark:text-gray-400">
                 No routes data available (Ziggy package not detected).
             </div>
         );
@@ -18,13 +18,13 @@ const RoutesPanel: React.FC<RoutesPanelProps> = ({ currentPage }) => {
 
     return (
         <div className="flex flex-col h-full">
-            <div className="p-4 border-b dark:border-github-dark-border">
+            <div className="p-4 border-b dark:border-gray-700">
                 <input
                     type="text"
                     placeholder="Search routes..."
                     value={routesSearch}
                     onChange={(e) => setRoutesSearch(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-slate-100 dark:bg-github-dark-button-bg dark:text-github-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    className="w-full px-3 py-2 text-sm bg-slate-100 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
             </div>
             <div className="flex-1 overflow-y-auto">
@@ -38,16 +38,16 @@ const RoutesPanel: React.FC<RoutesPanelProps> = ({ currentPage }) => {
                         );
                     })
                     .map(([name, route]: [string, any]) => (
-                        <div key={name} className="p-4 border-b dark:border-github-dark-border">
-                            <div className="font-semibold text-lg dark:text-github-dark-text mb-3">{name}</div>
+                        <div key={name} className="p-4 border-b dark:border-gray-700">
+                            <div className="font-semibold text-lg dark:text-white mb-3">{name}</div>
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">URI:</div>
-                                    <div className="font-mono text-slate-800 dark:text-github-dark-text">{route.uri}</div>
+                                    <div className="font-medium text-slate-500 dark:text-gray-400">URI:</div>
+                                    <div className="font-mono text-slate-800 dark:text-white">{route.uri}</div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Methods:</div>
+                                    <div className="font-medium text-slate-500 dark:text-gray-400">Methods:</div>
                                     <div className="flex gap-1">
                                         {route.methods.map((method: string) => (
                                             <span key={method} className={`px-1 text-xs font-semibold rounded-sm ${
@@ -64,22 +64,22 @@ const RoutesPanel: React.FC<RoutesPanelProps> = ({ currentPage }) => {
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                  <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Middleware:</div>
-                                  <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                  <div className="font-medium text-slate-500 dark:text-gray-400">Middleware:</div>
+                                  <div className="font-mono text-slate-800 dark:text-white">
                                       {route.middleware && route.middleware.length > 0 ? route.middleware.join(', ') : 'none'}
                                   </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                  <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Bindings:</div>
-                                  <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                  <div className="font-medium text-slate-500 dark:text-gray-400">Bindings:</div>
+                                  <div className="font-mono text-slate-800 dark:text-white">
                                       {route.bindings && Object.keys(route.bindings).length > 0 ? JSON.stringify(route.bindings) : 'none'}
                                   </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                  <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Wheres:</div>
-                                  <div className="font-mono text-slate-800 dark:text-github-dark-text">
+                                  <div className="font-medium text-slate-500 dark:text-gray-400">Wheres:</div>
+                                  <div className="font-mono text-slate-800 dark:text-white">
                                       {route.wheres && Object.keys(route.wheres).length > 0 ? JSON.stringify(route.wheres) : 'none'}
                                   </div>
                                 </div>

@@ -53,13 +53,13 @@ await Bun.build({
 
 console.log("✅ Bun build complete!");
 
-// Step 3: Copy public assets
+// Step 3: Process Tailwind CSS
+await $`tailwindcss -i ${publicFolder}/main.css -o ${outdir}/main.css --minify`;
+console.log("✅ Tailwind CSS processed!");
+
+// Step 4: Copy public assets
 const { Glob } = Bun;
 const glob = new Glob("**");
-
-const mainCssFile = Bun.file(`${publicFolder}/main.css`);
-
-if (!mainCssFile.exists()) throw new Error("main.css not found");
 
 for await (const filename of glob.scan(publicFolder)) {
   const file = Bun.file(`${publicFolder}/${filename}`);
@@ -75,8 +75,8 @@ for await (const filename of glob.scan(publicFolder)) {
 
     // rename files to index.html since it's being copied into a folder that share its original name
     await $`cp ${file.name} ${outdir}/${fileFolder}/index.html`;
-    // copy the css file into the folder
-    await $`bun run css -- ${mainCssFile.name} -o ${outdir}/${fileFolder}/main.css`.quiet();
+    // copy the generated css file into the folder
+    await $`cp ${outdir}/main.css ${outdir}/${fileFolder}/main.css`;
   } else {
     await $`cp ${file.name} ${outdir}`;
   }
@@ -85,7 +85,7 @@ for await (const filename of glob.scan(publicFolder)) {
 await $`cp -R ${publicFolder}/icons ${outdir}`;
 await $`cp ./src/injected.js ${outdir}`;
 
-// Step 4: Clean up temporary files
+// Step 5: Clean up temporary files
 await $`rm -rf ${tempdir}`;
 
 console.log("✅ Build complete with React Compiler optimizations!");

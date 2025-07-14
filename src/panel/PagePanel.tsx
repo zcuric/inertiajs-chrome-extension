@@ -269,49 +269,49 @@ const PagePanel: React.FC<PagePanelProps> = ({
 
     return (
         <div>
-            <div className="mb-6 p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
-                <h3 className="text-lg font-semibold dark:text-github-dark-text mb-2">Current Page</h3>
+            <div className="mb-6 p-4 bg-slate-50 dark:bg-gray-800 rounded-lg">
+                <h3 className="text-lg font-semibold dark:text-white mb-2">Current Page</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                        <span className="font-medium dark:text-github-dark-text-secondary">Component:</span>
-                        <span className="ml-2 font-mono dark:text-github-dark-text">{currentPage.component}</span>
+                        <span className="font-medium dark:text-gray-400">Component:</span>
+                        <span className="ml-2 font-mono dark:text-white">{currentPage.component}</span>
                     </div>
                     <div>
-                        <span className="font-medium dark:text-github-dark-text-secondary">URL:</span>
-                        <span className="ml-2 dark:text-github-dark-text">{currentPage.url}</span>
+                        <span className="font-medium dark:text-gray-400">URL:</span>
+                        <span className="ml-2 dark:text-white">{currentPage.url}</span>
                     </div>
                     {currentPage.version && (
                         <div>
-                            <span className="font-medium dark:text-github-dark-text-secondary">Version:</span>
-                            <span className="ml-2 font-mono dark:text-github-dark-text">{currentPage.version}</span>
+                            <span className="font-medium dark:text-gray-400">Version:</span>
+                            <span className="ml-2 font-mono dark:text-white">{currentPage.version}</span>
                         </div>
                     )}
                     {framework && (
                         <div>
-                            <span className="font-medium dark:text-github-dark-text-secondary">Framework:</span>
-                            <span className="ml-2 font-mono dark:text-github-dark-text">{framework.name} {framework.version}</span>
+                            <span className="font-medium dark:text-gray-400">Framework:</span>
+                            <span className="ml-2 font-mono dark:text-white">{framework.name} {framework.version}</span>
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="border-b dark:border-github-dark-border mb-4">
+            <div className="border-b dark:border-gray-700 mb-4">
                 <nav className="flex space-x-8">
                     <button
                         onClick={() => setActivePageView(PAGE_VIEWS.PROPS)}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm ${activePageView === PAGE_VIEWS.PROPS ? CSS_CLASSES.PAGE_TAB_ACTIVE : CSS_CLASSES.PAGE_TAB_INACTIVE}`}
+                        className={`py-2 px-1 font-medium text-sm transition-colors ${activePageView === PAGE_VIEWS.PROPS ? CSS_CLASSES.PAGE_TAB_ACTIVE : CSS_CLASSES.PAGE_TAB_INACTIVE}`}
                     >
                         Props
                     </button>
                     <button
                         onClick={() => setActivePageView(PAGE_VIEWS.SHARED)}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm ${activePageView === PAGE_VIEWS.SHARED ? CSS_CLASSES.PAGE_TAB_ACTIVE : CSS_CLASSES.PAGE_TAB_INACTIVE}`}
+                        className={`py-2 px-1 font-medium text-sm transition-colors ${activePageView === PAGE_VIEWS.SHARED ? CSS_CLASSES.PAGE_TAB_ACTIVE : CSS_CLASSES.PAGE_TAB_INACTIVE}`}
                     >
                         Shared
                     </button>
                     <button
                         onClick={() => setActivePageView(PAGE_VIEWS.DEFERRED)}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm ${activePageView === PAGE_VIEWS.DEFERRED ? CSS_CLASSES.PAGE_TAB_ACTIVE : CSS_CLASSES.PAGE_TAB_INACTIVE}`}
+                        className={`py-2 px-1 font-medium text-sm transition-colors ${activePageView === PAGE_VIEWS.DEFERRED ? CSS_CLASSES.PAGE_TAB_ACTIVE : CSS_CLASSES.PAGE_TAB_INACTIVE}`}
                     >
                         Deferred
                     </button>

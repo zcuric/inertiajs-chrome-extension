@@ -22,7 +22,7 @@ const {
 
 const directoriesToWatch = dir?.split(",").map((dir) => `./${dir}`) || [];
 
-const runBuild = async () => $`bun run config/build.ts`;
+const runBuild = async () => $`bun run config/build-with-react-compiler.ts`;
 await runBuild();
 
 const directories = directoriesToWatch.join(", ");
@@ -35,7 +35,7 @@ const watchers: FSWatcher[] = [];
 for (const directory of directoriesToWatch) {
   const watcher = watch(directory, { recursive: true }, async (_, filename) => {
     console.log(chalk.bold.yellow.dim(`Changes detected in ${filename}`))
-    
+
     await runBuild();
     console.log(chalk.bold.green("✔️ Updated build files"))
 

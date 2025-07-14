@@ -105,36 +105,32 @@ export const CSS_CLASSES = {
 	METHOD_DEFAULT: "bg-gray-100 text-gray-800",
 
 	// Tab Styles
-	TAB_ACTIVE: "border-sky-600 text-sky-600",
-	TAB_INACTIVE:
-		"border-transparent text-slate-500 hover:text-slate-700 dark:text-github-dark-text-secondary dark:hover:text-github-dark-text",
+	TAB_ACTIVE:
+		"border-sky-600 text-sky-600 bg-sky-50 dark:bg-sky-900/20 font-semibold",
+	TAB_INACTIVE: "",
 
 	// Page View Tab Styles
-	PAGE_TAB_ACTIVE: "border-sky-500 text-sky-600",
-	PAGE_TAB_INACTIVE: "border-transparent text-slate-500 hover:text-slate-600",
+	PAGE_TAB_ACTIVE:
+		"border-b border-sky-500 text-sky-600 bg-sky-50 dark:bg-sky-900/20 font-semibold",
+	PAGE_TAB_INACTIVE: "",
 
 	// Button Styles
 	BUTTON_PRIMARY: "bg-sky-700 text-gray-100",
-	BUTTON_SECONDARY:
-		"bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-button-text",
+	BUTTON_SECONDARY: "bg-slate-200 dark:bg-gray-800 dark:text-white",
 	BUTTON_CLEAR: "px-2 py-1 text-xs rounded bg-red-700 text-gray-100",
 	BUTTON_SETTINGS:
-		"p-2 rounded-full text-slate-500 dark:text-github-dark-text-secondary hover:bg-slate-200 dark:hover:bg-github-dark-button-hover-bg",
+		"p-2 rounded-full text-slate-500 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-gray-700",
 
 	// Layout
 	CENTER_CONTAINER: "flex items-center justify-center h-full",
-	LOADING_BG_LIGHT: "bg-gray-50",
-	LOADING_BG_DARK: "dark bg-github-dark-bg",
 
 	// Search Input
 	SEARCH_INPUT:
-		"px-2 py-1 text-sm w-40 bg-slate-200 dark:bg-github-dark-button-bg dark:text-github-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500",
+		"px-2 py-1 text-sm w-40 bg-slate-200 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500",
 
 	// Common Containers
-	SECTION_CONTAINER:
-		"p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg",
-	BORDER_CONTAINER:
-		"border dark:border-github-dark-border rounded-lg overflow-hidden",
+	SECTION_CONTAINER: "p-4 bg-slate-50 dark:bg-gray-800 rounded-lg",
+	BORDER_CONTAINER: "border dark:border-gray-700 rounded-lg overflow-hidden",
 } as const;
 
 // Messages

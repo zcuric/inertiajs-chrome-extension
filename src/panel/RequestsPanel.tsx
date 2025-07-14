@@ -228,9 +228,9 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
 
     return (
         <div className="flex h-full">
-            <div className="w-1/3 border-r dark:border-github-dark-border">
-                <div className="flex items-center justify-between p-4 border-b dark:border-github-dark-border">
-                    <h3 className="text-lg font-semibold dark:text-github-dark-text">Requests Timeline</h3>
+            <div className="w-1/3 border-r dark:border-gray-700">
+                <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
+                    <h3 className="text-lg font-semibold dark:text-white">Requests Timeline</h3>
                     <button
                         onClick={onClear}
                         className="px-3 py-1 text-xs bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-800 dark:text-red-200 rounded"
@@ -243,10 +243,10 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
                         <div
                             key={request.timestamp}
                             onClick={() => onRequestSelect(request)}
-                            className={`p-3 border-b dark:border-github-dark-border cursor-pointer transition-colors ${
+                            className={`p-3 border-b dark:border-gray-700 cursor-pointer transition-colors ${
                                 selectedRequest === request
                                     ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-                                    : 'hover:bg-slate-50 dark:hover:bg-github-dark-bg-secondary'
+                                    : 'hover:bg-slate-50 dark:hover:bg-gray-800'
                             }`}
                         >
                             <div className="flex items-center justify-between">
@@ -257,14 +257,14 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
                                     {request.status === 'error' && <span className="text-xs font-semibold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900 px-1.5 py-0.5 rounded-full">ERROR</span>}
                                     {request.isPartial && <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1.5 py-0.5 rounded-full">PARTIAL</span>}
                                 </div>
-                                <span className="text-xs dark:text-github-dark-text-secondary">
+                                <span className="text-xs dark:text-gray-400">
                                     {new Date(request.timestamp).toLocaleTimeString()}
                                 </span>
                             </div>
-                            <div className="text-sm font-medium dark:text-github-dark-text mt-1">
+                            <div className="text-sm font-medium dark:text-white mt-1">
                                 {request.component || 'Unknown'}
                             </div>
-                            <div className="text-xs dark:text-github-dark-text-secondary truncate">
+                            <div className="text-xs dark:text-gray-400 truncate">
                                 {request.url}
                             </div>
                         </div>
@@ -274,33 +274,33 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
             <div className="w-2/3 flex-1 flex flex-col min-w-0">
                 {selectedRequest ? (
                     <div className="flex-1 overflow-y-auto overflow-x-auto p-4 space-y-6">
-                        <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Request Details</h3>
-                        <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
+                        <h3 className="text-lg font-semibold dark:text-white mb-3">Request Details</h3>
+                        <div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-lg">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <span className="font-medium dark:text-github-dark-text-secondary">Status:</span>
+                                    <span className="font-medium dark:text-gray-400">Status:</span>
                                     <span className={`ml-2 font-mono ${selectedRequest.status === 'success' ? 'text-green-600' : selectedRequest.status === 'error' ? 'text-red-600' : 'text-slate-600'}`}>{selectedRequest.status}</span>
                                 </div>
                                 <div>
-                                    <span className="font-medium dark:text-github-dark-text-secondary">Method:</span>
-                                    <span className="ml-2 font-mono dark:text-github-dark-text truncate">{selectedRequest.method}</span>
+                                    <span className="font-medium dark:text-gray-400">Method:</span>
+                                    <span className="ml-2 font-mono dark:text-white truncate">{selectedRequest.method}</span>
                                 </div>
                                 <div>
-                                    <span className="font-medium dark:text-github-dark-text-secondary">URL:</span>
-                                    <span className="ml-2 dark:text-github-dark-text truncate break-all">{selectedRequest.url}</span>
+                                    <span className="font-medium dark:text-gray-400">URL:</span>
+                                    <span className="ml-2 dark:text-white truncate break-all">{selectedRequest.url}</span>
                                 </div>
                                 <div>
-                                    <span className="font-medium dark:text-github-dark-text-secondary">Component:</span>
-                                    <span className="ml-2 font-mono dark:text-github-dark-text truncate break-all">{selectedRequest.component}</span>
+                                    <span className="font-medium dark:text-gray-400">Component:</span>
+                                    <span className="ml-2 font-mono dark:text-white truncate break-all">{selectedRequest.component}</span>
                                 </div>
                                 <div>
-                                    <span className="font-medium dark:text-github-dark-text-secondary">Response time:</span>
-                                    <span className="ml-2 dark:text-github-dark-text">{selectedRequest.responseTime}ms</span>
+                                    <span className="font-medium dark:text-gray-400">Response time:</span>
+                                    <span className="ml-2 dark:text-white">{selectedRequest.responseTime}ms</span>
                                 </div>
                             </div>
 
                             <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                                <span className="font-medium dark:text-github-dark-text-secondary">Props:</span>
+                                <span className="font-medium dark:text-gray-400">Props:</span>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {Object.keys(selectedRequest.props || {}).map((prop) => (
                                         <span key={prop} className="px-2 py-1 text-xs font-mono bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded-full">{prop}</span>
@@ -310,36 +310,36 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
                         </div>
 
                         <div>
-                            <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">URL Analysis</h3>
-                            <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg text-sm space-y-2">
-                                <div>
-                                    <span className="font-medium dark:text-github-dark-text-secondary">Full URL:</span>
-                                    <span className="ml-2 font-mono dark:text-github-dark-text break-all truncate">{selectedRequest.url}</span>
-                                </div>
+                                                    <h3 className="text-lg font-semibold dark:text-white mb-3">URL Analysis</h3>
+                        <div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-lg text-sm space-y-2">
+                            <div>
+                                <span className="font-medium dark:text-gray-400">Full URL:</span>
+                                <span className="ml-2 font-mono dark:text-white break-all truncate">{selectedRequest.url}</span>
+                            </div>
 
-                                <div>
-                                    <span className="font-medium dark:text-github-dark-text-secondary">Query Parameters:</span>
+                            <div>
+                                <span className="font-medium dark:text-gray-400">Query Parameters:</span>
                                     <div className="mt-1 pl-4">
                                         {(() => {
                                             try {
                                                 const url = new URL(selectedRequest.url);
                                                 const params = Array.from(url.searchParams.entries());
-                                                if (params.length === 0) return <span className="text-slate-500 dark:text-github-dark-text-secondary ml-2">None</span>;
+                                                if (params.length === 0) return <span className="text-slate-500 dark:text-gray-400 ml-2">None</span>;
 
                                                 return (
                                                     <table className="min-w-full">
                                                         <tbody>
                                                             {params.map(([key, value]) => (
                                                                 <tr key={key}>
-                                                                    <td className="pr-4 font-mono dark:text-github-dark-text-secondary">{key}</td>
-                                                                    <td className="dark:text-github-dark-text">{value}</td>
+                                                                                                            <td className="pr-4 font-mono dark:text-gray-400">{key}</td>
+                                        <td className="dark:text-white">{value}</td>
                                                                 </tr>
                                                             ))}
                                                         </tbody>
                                                     </table>
                                                 );
                                             } catch (e) {
-                                                return <span className="text-slate-500 dark:text-github-dark-text-secondary ml-2">Invalid URL</span>
+                                                return <span className="text-slate-500 dark:text-gray-400 ml-2">Invalid URL</span>
                                             }
                                         })()}
                                     </div>
@@ -363,8 +363,8 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
                             </div>
                         )}
                         <div>
-                            <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Props</h3>
-                            <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
+                            <h3 className="text-lg font-semibold dark:text-white mb-3">Props</h3>
+                            <div className="border dark:border-gray-700 rounded-lg overflow-hidden">
                                 <Toolbar
                                     onSearch={handleSearch}
                                     onKeyDown={handleSearchKeyDown}
@@ -387,7 +387,7 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-github-dark-text-secondary">
+                    <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-gray-400">
                         Select a request from the timeline to view details.
                     </div>
                 )}
