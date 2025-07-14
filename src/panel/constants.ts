@@ -105,13 +105,11 @@ export const CSS_CLASSES = {
 	METHOD_DEFAULT: "bg-gray-100 text-gray-800",
 
 	// Tab Styles
-	TAB_ACTIVE:
-		"border-sky-600 text-sky-600 bg-sky-50 dark:bg-sky-900/20 font-semibold",
+	TAB_ACTIVE: "border-b border-sky-600 text-sky-600 font-semibold",
 	TAB_INACTIVE: "",
 
 	// Page View Tab Styles
-	PAGE_TAB_ACTIVE:
-		"border-b border-sky-500 text-sky-600 bg-sky-50 dark:bg-sky-900/20 font-semibold",
+	PAGE_TAB_ACTIVE: "border-b border-sky-500 text-sky-600 font-semibold",
 	PAGE_TAB_INACTIVE: "",
 
 	// Button Styles
