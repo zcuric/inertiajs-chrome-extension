@@ -319,12 +319,6 @@ const PagePanel: React.FC<PagePanelProps> = ({
 }) => {
 	const [searchTerm, setSearchTerm] = useState("");
 
-	// Clear search when changing page views
-	useEffect(() => {
-		// Clear search term when user switches between Props/Shared/Deferred tabs
-		setSearchTerm("");
-	}, [activePageView]); // activePageView is needed to trigger reset on tab change
-
 	const handleSearch = (search: string) => {
 		setSearchTerm(search);
 	};
@@ -370,50 +364,18 @@ const PagePanel: React.FC<PagePanelProps> = ({
 	};
 
 	return (
-		<div>
-			<div className="mb-6 p-4 bg-slate-50 dark:bg-gray-800 rounded-lg">
-				<h3 className="text-lg font-semibold dark:text-white mb-2">
-					Current Page
-				</h3>
-				<div className="grid grid-cols-2 gap-4 text-sm">
-					<div>
-						<span className="font-medium dark:text-gray-400">Component:</span>
-						<span className="ml-2 font-mono dark:text-white">
-							{currentPage.component}
-						</span>
-					</div>
-					<div>
-						<span className="font-medium dark:text-gray-400">URL:</span>
-						<span className="ml-2 dark:text-white">{currentPage.url}</span>
-					</div>
-					{currentPage.version && (
-						<div>
-							<span className="font-medium dark:text-gray-400">Version:</span>
-							<span className="ml-2 font-mono dark:text-white">
-								{currentPage.version}
-							</span>
-						</div>
-					)}
-					{framework && (
-						<div>
-							<span className="font-medium dark:text-gray-400">Framework:</span>
-							<span className="ml-2 font-mono dark:text-white">
-								{framework.name} {framework.version}
-							</span>
-						</div>
-					)}
-				</div>
-			</div>
-
-			<div className="border-b dark:border-gray-700 mb-4">
-				<nav className="flex space-x-8">
+		<div className="flex h-full">
+			{/* Left Section - JSON View (60%) */}
+			<div className="w-3/5 flex flex-col pr-4">
+				{/* View Type Buttons */}
+				<div className="mb-4 flex gap-2">
 					<button
 						type="button"
 						onClick={() => setActivePageView(PAGE_VIEWS.PROPS)}
-						className={`py-2 px-1 font-medium text-sm transition-colors ${
+						className={`px-3 py-2 text-sm rounded-md font-medium transition-colors ${
 							activePageView === PAGE_VIEWS.PROPS
-								? CSS_CLASSES.PAGE_TAB_ACTIVE
-								: CSS_CLASSES.PAGE_TAB_INACTIVE
+								? "bg-sky-600 text-white"
+								: "bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-600"
 						}`}
 					>
 						Props
@@ -421,10 +383,10 @@ const PagePanel: React.FC<PagePanelProps> = ({
 					<button
 						type="button"
 						onClick={() => setActivePageView(PAGE_VIEWS.SHARED)}
-						className={`py-2 px-1 font-medium text-sm transition-colors ${
+						className={`px-3 py-2 text-sm rounded-md font-medium transition-colors ${
 							activePageView === PAGE_VIEWS.SHARED
-								? CSS_CLASSES.PAGE_TAB_ACTIVE
-								: CSS_CLASSES.PAGE_TAB_INACTIVE
+								? "bg-sky-600 text-white"
+								: "bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-600"
 						}`}
 					>
 						Shared
@@ -432,45 +394,193 @@ const PagePanel: React.FC<PagePanelProps> = ({
 					<button
 						type="button"
 						onClick={() => setActivePageView(PAGE_VIEWS.DEFERRED)}
-						className={`py-2 px-1 font-medium text-sm transition-colors ${
+						className={`px-3 py-2 text-sm rounded-md font-medium transition-colors ${
 							activePageView === PAGE_VIEWS.DEFERRED
-								? CSS_CLASSES.PAGE_TAB_ACTIVE
-								: CSS_CLASSES.PAGE_TAB_INACTIVE
+								? "bg-sky-600 text-white"
+								: "bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-600"
 						}`}
 					>
 						Deferred
 					</button>
-				</nav>
+				</div>
+
+				{/* JSON View Container */}
+				<div className="flex-1">
+					<div className={CSS_CLASSES.BORDER_CONTAINER}>
+						<Toolbar
+							onSearch={handleSearch}
+							onKeyDown={handleSearchKeyDown}
+							onToggleCollapse={onToggleCollapse}
+							onIndentIncrease={() => onIndentChange(1)}
+							onIndentDecrease={() => onIndentChange(-1)}
+							onFontSizeIncrease={() => onFontSizeChange(1)}
+							onFontSizeDecrease={() => onFontSizeChange(-1)}
+							isCollapsed={settings.jsonView.collapsed !== false}
+						/>
+						<div className="json-search-container">
+							{activePageView === PAGE_VIEWS.PROPS && (
+								<JsonView value={filteredPropsData} {...jsonViewProps}>
+									{!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+								</JsonView>
+							)}
+							{activePageView === PAGE_VIEWS.SHARED && (
+								<JsonView value={filteredSharedData} {...jsonViewProps}>
+									{!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+								</JsonView>
+							)}
+							{activePageView === PAGE_VIEWS.DEFERRED && (
+								<JsonView value={filteredDeferredData} {...jsonViewProps}>
+									{!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
+								</JsonView>
+							)}
+						</div>
+					</div>
+				</div>
 			</div>
 
-			<div className="mt-4">
-				<div className={CSS_CLASSES.BORDER_CONTAINER}>
-					<Toolbar
-						onSearch={handleSearch}
-						onKeyDown={handleSearchKeyDown}
-						onToggleCollapse={onToggleCollapse}
-						onIndentIncrease={() => onIndentChange(1)}
-						onIndentDecrease={() => onIndentChange(-1)}
-						onFontSizeIncrease={() => onFontSizeChange(1)}
-						onFontSizeDecrease={() => onFontSizeChange(-1)}
-						isCollapsed={settings.jsonView.collapsed !== false}
-					/>
-					<div className="json-search-container">
-						{activePageView === PAGE_VIEWS.PROPS && (
-							<JsonView value={filteredPropsData} {...jsonViewProps}>
-								{!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-							</JsonView>
-						)}
-						{activePageView === PAGE_VIEWS.SHARED && (
-							<JsonView value={filteredSharedData} {...jsonViewProps}>
-								{!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-							</JsonView>
-						)}
-						{activePageView === PAGE_VIEWS.DEFERRED && (
-							<JsonView value={filteredDeferredData} {...jsonViewProps}>
-								{!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-							</JsonView>
-						)}
+			{/* Right Section - Component Information (40%) */}
+			<div className="w-2/5 border-l dark:border-gray-700 pl-4">
+				<h3 className="text-lg font-semibold dark:text-white mb-4">
+					Current Page
+				</h3>
+				<div className="space-y-4">
+					<div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-lg">
+						<div className="grid grid-cols-1 gap-4 text-sm">
+							<div>
+								<span className="font-medium dark:text-gray-400">
+									Component:
+								</span>
+								<span className="ml-2 font-mono dark:text-white">
+									{currentPage.component}
+								</span>
+							</div>
+							<div>
+								<span className="font-medium dark:text-gray-400">URL:</span>
+								<span className="ml-2 dark:text-white break-all">
+									{currentPage.url}
+								</span>
+							</div>
+							{currentPage.version && (
+								<div>
+									<span className="font-medium dark:text-gray-400">
+										Version:
+									</span>
+									<span className="ml-2 font-mono dark:text-white">
+										{currentPage.version}
+									</span>
+								</div>
+							)}
+							{framework && (
+								<div>
+									<span className="font-medium dark:text-gray-400">
+										Framework:
+									</span>
+									<span className="ml-2 font-mono dark:text-white">
+										{framework.name} {framework.version}
+									</span>
+								</div>
+							)}
+						</div>
+					</div>
+
+					{/* URL Analysis Section */}
+					<div>
+						<h4 className="text-lg font-semibold dark:text-white mb-3">
+							URL Analysis
+						</h4>
+						<div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-lg text-sm space-y-3">
+							<div>
+								<span className="font-medium dark:text-gray-400">
+									Full URL:
+								</span>
+								<span className="ml-2 font-mono dark:text-white break-all">
+									{currentPage.url}
+								</span>
+							</div>
+							<div>
+								<span className="font-medium dark:text-gray-400">
+									Query Parameters:
+								</span>
+								<div className="mt-2 pl-4">
+									{(() => {
+										try {
+											// Handle both relative and absolute URLs
+											let urlToAnalyze: string;
+											if (currentPage.url.startsWith('http')) {
+												// Already a full URL
+												urlToAnalyze = currentPage.url;
+											} else {
+												// Relative URL - construct a full URL for parsing
+												urlToAnalyze = `https://example.com${currentPage.url}`;
+											}
+
+											const url = new URL(urlToAnalyze);
+											const params = Array.from(url.searchParams.entries());
+
+											if (params.length === 0) {
+												return (
+													<span className="text-slate-500 dark:text-gray-400">
+														None
+													</span>
+												);
+											}
+
+											return (
+												<div className="space-y-1">
+													{params.map(([key, value]) => (
+														<div key={key} className="flex items-start gap-2">
+															<span className="font-mono text-xs dark:text-gray-400 min-w-0 flex-shrink-0">
+																{key}:
+															</span>
+															<span className="dark:text-white text-xs break-all">
+																{value}
+															</span>
+														</div>
+													))}
+												</div>
+											);
+										} catch (e: unknown) {
+											// Fallback: try to parse query string manually
+											const queryIndex = currentPage.url.indexOf('?');
+											if (queryIndex === -1) {
+												return (
+													<span className="text-slate-500 dark:text-gray-400">
+														None
+													</span>
+												);
+											}
+
+											const queryString = currentPage.url.substring(queryIndex + 1);
+											const params = new URLSearchParams(queryString);
+											const paramEntries = Array.from(params.entries());
+
+											if (paramEntries.length === 0) {
+												return (
+													<span className="text-slate-500 dark:text-gray-400">
+														None
+													</span>
+												);
+											}
+
+											return (
+												<div className="space-y-1">
+													{paramEntries.map(([key, value]) => (
+														<div key={key} className="flex items-start gap-2">
+															<span className="font-mono text-xs dark:text-gray-400 min-w-0 flex-shrink-0">
+																{key}:
+															</span>
+															<span className="dark:text-white text-xs break-all">
+																{value}
+															</span>
+														</div>
+													))}
+												</div>
+											);
+										}
+									})()}
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
