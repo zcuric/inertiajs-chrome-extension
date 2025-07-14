@@ -1,6 +1,6 @@
 import JsonView from "@uiw/react-json-view";
 import type React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Toolbar from "./Toolbar";
 import { themes } from "./themes";
 import type { InertiaRequest, PanelSettings } from "./types";
@@ -258,6 +258,7 @@ const FormsPanel: React.FC<FormsPanelProps> = ({
 						Form Submissions
 					</h3>
 					<button
+						type="button"
 						onClick={onClear}
 						className="px-3 py-1 text-xs bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-800 dark:text-red-200 rounded"
 					>
@@ -266,10 +267,11 @@ const FormsPanel: React.FC<FormsPanelProps> = ({
 				</div>
 				<div className="overflow-y-auto h-full">
 					{formRequests.map((request, index) => (
-						<div
+						<button
+							type="button"
 							key={request.timestamp}
 							onClick={() => onRequestSelect(request)}
-							className={`p-3 border-b dark:border-gray-700 cursor-pointer transition-colors ${
+							className={`w-full text-left p-3 border-b dark:border-gray-700 cursor-pointer transition-colors ${
 								selectedRequest === request
 									? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
 									: "hover:bg-slate-50 dark:hover:bg-gray-800"
@@ -303,7 +305,7 @@ const FormsPanel: React.FC<FormsPanelProps> = ({
 							<div className="text-xs dark:text-gray-400 truncate">
 								{request.url}
 							</div>
-						</div>
+						</button>
 					))}
 				</div>
 			</div>

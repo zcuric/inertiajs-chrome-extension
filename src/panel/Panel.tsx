@@ -91,6 +91,7 @@ const Panel: React.FC = () => {
 				<div className="border-b dark:border-gray-700 bg-slate-50 dark:bg-gray-900">
 					<nav className="flex items-center space-x-8 px-4">
 						<button
+							type="button"
 							onClick={() => setActiveTab(TAB_NAMES.PAGE)}
 							className={`py-2 px-1 font-medium text-sm transition-colors ${
 								activeTab === TAB_NAMES.PAGE
@@ -101,6 +102,7 @@ const Panel: React.FC = () => {
 							Page
 						</button>
 						<button
+							type="button"
 							onClick={() => setActiveTab(TAB_NAMES.REQUESTS)}
 							className={`py-2 px-1 font-medium text-sm transition-colors ${
 								activeTab === TAB_NAMES.REQUESTS
@@ -111,6 +113,7 @@ const Panel: React.FC = () => {
 							Requests
 						</button>
 						<button
+							type="button"
 							onClick={() => setActiveTab(TAB_NAMES.FORMS)}
 							className={`py-2 px-1 font-medium text-sm transition-colors ${
 								activeTab === TAB_NAMES.FORMS
@@ -122,6 +125,7 @@ const Panel: React.FC = () => {
 						</button>
 						{currentPage?.props?.ziggy && (
 							<button
+								type="button"
 								onClick={() => setActiveTab(TAB_NAMES.ROUTES)}
 								className={`py-2 px-1 font-medium text-sm transition-colors ${
 									activeTab === TAB_NAMES.ROUTES
@@ -134,6 +138,7 @@ const Panel: React.FC = () => {
 						)}
 						<div className="flex-1" />
 						<button
+							type="button"
 							onClick={() => setActiveTab(TAB_NAMES.SETTINGS)}
 							className={`${CSS_CLASSES.BUTTON_SETTINGS} ${
 								activeTab === TAB_NAMES.SETTINGS

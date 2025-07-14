@@ -1,6 +1,6 @@
 import JsonView from "@uiw/react-json-view";
 import type React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CSS_CLASSES, JSON_VIEW_DEFAULTS, PAGE_VIEWS } from "./constants";
 import Toolbar from "./Toolbar";
 import { themes } from "./themes";
@@ -205,6 +205,107 @@ const filterByPathParts = (data: any, pathParts: string[]): any => {
 	return result;
 };
 
+// Helper function to detect if a prop is likely deferred based on Inertia.js patterns
+const isLikelyDeferredProp = (value: any, key: string): boolean => {
+	// Common patterns for deferred props:
+	// 1. Props that are explicitly null (common initial state)
+	// 2. Empty objects (common placeholder pattern)
+	// 3. Props with specific deferred-related naming patterns
+	if (value === null) return true;
+
+	// Check for empty objects (common deferred placeholder)
+	if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+		if (Object.keys(value).length === 0) return true;
+	}
+
+	// Check for common deferred prop naming patterns
+	const deferredPatterns = ["lazy", "deferred", "async", "paginated"];
+	const keyLower = key.toLowerCase();
+	if (deferredPatterns.some((pattern) => keyLower.includes(pattern))) {
+		return true;
+	}
+
+	return false;
+};
+
+// Moved outside component to avoid re-creation and dependency issues
+const createGetDeferredData = (
+	currentPage: InertiaPage | null,
+	previousPage: InertiaPage | null,
+) => {
+	if (!currentPage) return {};
+
+	const deferredKeys = Object.keys(currentPage.props).filter((key) => {
+		const currentValue = currentPage.props[key];
+
+		if (previousPage) {
+			const previousValue = previousPage.props[key];
+
+			// Enhanced logic: A prop is deferred if:
+			// 1. It transitioned from null/undefined to having a value (original logic)
+			// 2. It was previously an empty object and now has content
+			// 3. It matches common deferred patterns
+			if (
+				(previousValue === null || typeof previousValue === "undefined") &&
+				currentValue !== null &&
+				typeof currentValue !== "undefined"
+			) {
+				return true;
+			}
+
+			// Check for empty object to populated object transition
+			if (
+				typeof previousValue === "object" &&
+				previousValue !== null &&
+				!Array.isArray(previousValue) &&
+				Object.keys(previousValue).length === 0 &&
+				typeof currentValue === "object" &&
+				currentValue !== null &&
+				!Array.isArray(currentValue) &&
+				Object.keys(currentValue).length > 0
+			) {
+				return true;
+			}
+		}
+
+		// For initial load or when no previous page, use enhanced pattern detection
+		return isLikelyDeferredProp(currentValue, key);
+	});
+
+	return deferredKeys.reduce(
+		(acc, key) => {
+			acc[key] = currentPage.props[key];
+			return acc;
+		},
+		{} as Record<string, any>,
+	);
+};
+
+// Moved outside component to avoid re-creation and dependency issues
+const createGetSharedData = (
+	currentPage: InertiaPage | null,
+	previousPage: InertiaPage | null,
+) => {
+	if (!currentPage || !previousPage) return {};
+
+	const currentKeys = Object.keys(currentPage.props);
+	const prevKeys = Object.keys(previousPage.props);
+	const sharedKeys = currentKeys.filter(
+		(key) =>
+			prevKeys.includes(key) &&
+			JSON.stringify(currentPage.props[key]) ===
+				JSON.stringify(previousPage.props[key]),
+	);
+
+	return sharedKeys.reduce(
+		(acc, key) => {
+			acc[key] = currentPage.props[key];
+			return acc;
+		},
+		{} as Record<string, any>,
+	);
+};
+
 const PagePanel: React.FC<PagePanelProps> = ({
 	currentPage,
 	previousPage,
@@ -220,8 +321,9 @@ const PagePanel: React.FC<PagePanelProps> = ({
 
 	// Clear search when changing page views
 	useEffect(() => {
+		// Clear search term when user switches between Props/Shared/Deferred tabs
 		setSearchTerm("");
-	}, [activePageView]);
+	}, [activePageView]); // activePageView is needed to trigger reset on tab change
 
 	const handleSearch = (search: string) => {
 		setSearchTerm(search);
@@ -233,56 +335,14 @@ const PagePanel: React.FC<PagePanelProps> = ({
 		}
 	};
 
-	const getDeferredData = () => {
-		if (!currentPage) return {};
+	// Use useCallback to memoize the data getter functions
+	const getDeferredData = useCallback(() => {
+		return createGetDeferredData(currentPage, previousPage);
+	}, [currentPage, previousPage]);
 
-		const deferredKeys = Object.keys(currentPage.props).filter((key) => {
-			if (previousPage) {
-				// A prop is likely deferred if it was null/undefined on the previous page and now has a value
-				return (
-					(previousPage.props[key] === null ||
-						typeof previousPage.props[key] === "undefined") &&
-					currentPage.props[key] !== null &&
-					typeof currentPage.props[key] !== "undefined"
-				);
-			}
-			// Fallback for initial load: find props that are objects with no keys, a common pattern for deferred placeholders.
-			return (
-				typeof currentPage.props[key] === "object" &&
-				currentPage.props[key] !== null &&
-				Object.keys(currentPage.props[key]).length === 0
-			);
-		});
-
-		return deferredKeys.reduce(
-			(acc, key) => {
-				acc[key] = currentPage.props[key];
-				return acc;
-			},
-			{} as Record<string, any>,
-		);
-	};
-
-	const getSharedData = () => {
-		if (!currentPage || !previousPage) return {};
-
-		const currentKeys = Object.keys(currentPage.props);
-		const prevKeys = Object.keys(previousPage.props);
-		const sharedKeys = currentKeys.filter(
-			(key) =>
-				prevKeys.includes(key) &&
-				JSON.stringify(currentPage.props[key]) ===
-					JSON.stringify(previousPage.props[key]),
-		);
-
-		return sharedKeys.reduce(
-			(acc, key) => {
-				acc[key] = currentPage.props[key];
-				return acc;
-			},
-			{} as Record<string, any>,
-		);
-	};
+	const getSharedData = useCallback(() => {
+		return createGetSharedData(currentPage, previousPage);
+	}, [currentPage, previousPage]);
 
 	// Memoized filtered data for each view
 	const filteredPropsData = useMemo(() => {
@@ -291,11 +351,11 @@ const PagePanel: React.FC<PagePanelProps> = ({
 
 	const filteredSharedData = useMemo(() => {
 		return filterJsonData(getSharedData(), searchTerm);
-	}, [currentPage, previousPage, searchTerm]);
+	}, [getSharedData, searchTerm]);
 
 	const filteredDeferredData = useMemo(() => {
 		return filterJsonData(getDeferredData(), searchTerm);
-	}, [currentPage, previousPage, searchTerm]);
+	}, [getDeferredData, searchTerm]);
 
 	const { quotesOnKeys, ...restJsonViewSettings } = settings.jsonView;
 
@@ -348,6 +408,7 @@ const PagePanel: React.FC<PagePanelProps> = ({
 			<div className="border-b dark:border-gray-700 mb-4">
 				<nav className="flex space-x-8">
 					<button
+						type="button"
 						onClick={() => setActivePageView(PAGE_VIEWS.PROPS)}
 						className={`py-2 px-1 font-medium text-sm transition-colors ${
 							activePageView === PAGE_VIEWS.PROPS
@@ -358,6 +419,7 @@ const PagePanel: React.FC<PagePanelProps> = ({
 						Props
 					</button>
 					<button
+						type="button"
 						onClick={() => setActivePageView(PAGE_VIEWS.SHARED)}
 						className={`py-2 px-1 font-medium text-sm transition-colors ${
 							activePageView === PAGE_VIEWS.SHARED
@@ -368,6 +430,7 @@ const PagePanel: React.FC<PagePanelProps> = ({
 						Shared
 					</button>
 					<button
+						type="button"
 						onClick={() => setActivePageView(PAGE_VIEWS.DEFERRED)}
 						className={`py-2 px-1 font-medium text-sm transition-colors ${
 							activePageView === PAGE_VIEWS.DEFERRED

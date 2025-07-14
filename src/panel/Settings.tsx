@@ -67,18 +67,21 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 						</div>
 						<div className="flex items-center space-x-2">
 							<button
+								type="button"
 								onClick={() => setAppTheme("light")}
 								className={`px-3 py-1 text-xs rounded ${settings.appTheme === "light" ? "bg-sky-700 text-gray-100" : "bg-slate-200 dark:bg-gray-800 dark:text-white"}`}
 							>
 								Light
 							</button>
 							<button
+								type="button"
 								onClick={() => setAppTheme("dark")}
 								className={`px-3 py-1 text-xs rounded ${settings.appTheme === "dark" ? "bg-sky-700 text-gray-100" : "bg-slate-200 dark:bg-gray-800 dark:text-white"}`}
 							>
 								Dark
 							</button>
 							<button
+								type="button"
 								onClick={() => setAppTheme("system")}
 								className={`px-3 py-1 text-xs rounded ${settings.appTheme === "system" ? "bg-sky-700 text-gray-100" : "bg-slate-200 dark:bg-gray-700 dark:text-white"}`}
 							>
@@ -94,7 +97,9 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 				</h3>
 				<div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-lg grid grid-cols-2 gap-4">
 					<div className="text-sm">
-						<label className="font-medium dark:text-gray-400">Theme</label>
+						<label htmlFor="theme" className="font-medium dark:text-gray-400">
+							Theme
+						</label>
 						<select
 							value={settings.jsonView.theme}
 							onChange={(e) => handleJsonViewChange("theme", e.target.value)}
@@ -108,7 +113,12 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 						</select>
 					</div>
 					<div className="text-sm">
-						<label className="font-medium dark:text-gray-400">Font Size</label>
+						<label
+							htmlFor="fontSize"
+							className="font-medium dark:text-gray-400"
+						>
+							Font Size
+						</label>
 						<input
 							type="number"
 							value={settings.jsonView.fontSize}
@@ -119,7 +129,10 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 						/>
 					</div>
 					<div className="text-sm">
-						<label className="font-medium dark:text-gray-400">
+						<label
+							htmlFor="indentWidth"
+							className="font-medium dark:text-gray-400"
+						>
 							Indent Width
 						</label>
 						<input
@@ -135,7 +148,12 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 						/>
 					</div>
 					<div className="text-sm">
-						<label className="font-medium dark:text-gray-400">Collapsed</label>
+						<label
+							htmlFor="collapsed"
+							className="font-medium dark:text-gray-400"
+						>
+							Collapsed
+						</label>
 						<input
 							type="number"
 							value={
@@ -151,7 +169,10 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 					</div>
 					<div className="col-span-2 grid grid-cols-2 gap-4">
 						<div className="flex items-center justify-between text-sm">
-							<label className="font-medium dark:text-gray-400">
+							<label
+								htmlFor="displayObjectSize"
+								className="font-medium dark:text-gray-400"
+							>
 								Display Object Size
 							</label>
 							<input
@@ -163,7 +184,10 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 							/>
 						</div>
 						<div className="flex items-center justify-between text-sm">
-							<label className="font-medium dark:text-gray-400">
+							<label
+								htmlFor="displayDataTypes"
+								className="font-medium dark:text-gray-400"
+							>
 								Display Data Types
 							</label>
 							<input
@@ -175,7 +199,10 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 							/>
 						</div>
 						<div className="flex items-center justify-between text-sm">
-							<label className="font-medium dark:text-gray-400">
+							<label
+								htmlFor="enableClipboard"
+								className="font-medium dark:text-gray-400"
+							>
 								Enable Clipboard
 							</label>
 							<input
@@ -187,7 +214,10 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 							/>
 						</div>
 						<div className="flex items-center justify-between text-sm">
-							<label className="font-medium dark:text-gray-400">
+							<label
+								htmlFor="objectSortKeys"
+								className="font-medium dark:text-gray-400"
+							>
 								Sort Object Keys
 							</label>
 							<input
@@ -199,7 +229,10 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 							/>
 						</div>
 						<div className="flex items-center justify-between text-sm">
-							<label className="font-medium dark:text-gray-400">
+							<label
+								htmlFor="quotesOnKeys"
+								className="font-medium dark:text-gray-400"
+							>
 								Quotes on Keys
 							</label>
 							<input
@@ -211,7 +244,10 @@ const Settings: React.FC<SettingsProps> = ({ settings, onSettingsChange }) => {
 							/>
 						</div>
 						<div className="flex items-center justify-between text-sm">
-							<label className="font-medium dark:text-gray-400">
+							<label
+								htmlFor="highlightUpdates"
+								className="font-medium dark:text-gray-400"
+							>
 								Highlight Updates
 							</label>
 							<input

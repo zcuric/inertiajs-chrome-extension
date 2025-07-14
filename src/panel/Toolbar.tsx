@@ -34,6 +34,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
 			</div>
 			<div className="flex items-center space-x-4">
 				<button
+					type="button"
 					onClick={onToggleCollapse}
 					className="px-2 py-1 text-xs rounded bg-slate-200 dark:bg-gray-700 dark:text-white"
 				>
@@ -42,12 +43,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
 				<div className="flex items-center space-x-1">
 					<span className="text-xs font-medium dark:text-gray-400">Indent</span>
 					<button
+						type="button"
 						onClick={onIndentDecrease}
 						className="px-2 py-0.5 text-sm rounded bg-slate-200 dark:bg-gray-700 dark:text-white"
 					>
 						-
 					</button>
 					<button
+						type="button"
 						onClick={onIndentIncrease}
 						className="px-2 py-0.5 text-sm rounded bg-slate-200 dark:bg-gray-700 dark:text-white"
 					>
@@ -59,12 +62,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
 						Font Size
 					</span>
 					<button
+						type="button"
 						onClick={onFontSizeDecrease}
 						className="px-2 py-0.5 text-sm rounded bg-slate-200 dark:bg-gray-700 dark:text-white"
 					>
 						-
 					</button>
 					<button
+						type="button"
 						onClick={onFontSizeIncrease}
 						className="px-2 py-0.5 text-sm rounded bg-slate-200 dark:bg-gray-700 dark:text-white"
 					>
