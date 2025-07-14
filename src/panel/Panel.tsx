@@ -1,36 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import JsonView from '@uiw/react-json-view';
-import { lightTheme } from '@uiw/react-json-view/light';
-import { darkTheme } from '@uiw/react-json-view/dark';
-import { nordTheme } from '@uiw/react-json-view/nord';
-import { githubLightTheme } from '@uiw/react-json-view/githubLight';
-import { githubDarkTheme } from '@uiw/react-json-view/githubDark';
-import { vscodeTheme } from '@uiw/react-json-view/vscode';
-import { gruvboxTheme } from '@uiw/react-json-view/gruvbox';
-import { monokaiTheme } from '@uiw/react-json-view/monokai';
-import { basicTheme } from '@uiw/react-json-view/basic';
 import Settings from './Settings';
 import type { PanelSettings, JsonViewSettings } from './Settings';
-import Toolbar from './Toolbar';
+import RequestsPanel from './RequestsPanel';
+import PagePanel from './PagePanel';
+import FormsPanel from './FormsPanel';
+import RoutesPanel from './RoutesPanel';
+import type { InertiaPage, InertiaRequest } from './types';
 
-const themes = {
-    lightTheme,
-    darkTheme,
-    nordTheme,
-    githubLightTheme,
-    githubDarkTheme,
-    vscodeTheme,
-    gruvboxTheme,
-    monokaiTheme,
-    basicTheme
-};
 
-interface InertiaPage {
-    component: string;
-    props: Record<string, any>;
-    url: string;
-    version: string | null;
-}
+
+
 
 const defaultJsonViewSettings: JsonViewSettings = {
     objectSortKeys: false,
@@ -51,23 +30,7 @@ const defaultSettings: PanelSettings = {
     jsonView: defaultJsonViewSettings,
 };
 
-interface InertiaRequest {
-    id: string;
-    timestamp: number;
-    method: string;
-    url: string;
-    component: string;
-    props: Record<string, any>;
-    headers: Record<string, string>;
-    responseTime?: number;
-    status: 'success' | 'error' | 'pending';
-    errors?: Record<string, string>;
-    visitType: 'initial' | 'navigate';
-    isRedirect: boolean;
-    data?: Record<string, any>;
-    isPartial?: boolean;
-    only?: string[];
-}
+
 
 const Panel: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<InertiaPage | null>(null);
@@ -81,31 +44,8 @@ const Panel: React.FC = () => {
     const [settings, setSettings] = useState<PanelSettings>(defaultSettings);
     const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light');
     const [highlightSearch, setHighlightSearch] = useState('');
-    const [routesSearch, setRoutesSearch] = useState('');
     const tabId = chrome.devtools.inspectedWindow.tabId;
-    const pageContainerRef = useRef<HTMLDivElement>(null);
-    const requestsContainerRef = useRef<HTMLDivElement>(null);
-    const formsContainerRef = useRef<HTMLDivElement>(null);
-    const [searchResultIndex, setSearchResultIndex] = useState(0);
     const [previousPage, setPreviousPage] = useState<InertiaPage | null>(null);
-
-    const getDeferredData = () => {
-        if (!currentPage) return {};
-
-        const deferredKeys = Object.keys(currentPage.props).filter(key => {
-            if (previousPage) {
-                // A prop is likely deferred if it was null/undefined on the previous page and now has a value
-                return (previousPage.props[key] === null || typeof previousPage.props[key] === 'undefined') && currentPage.props[key] !== null && typeof currentPage.props[key] !== 'undefined';
-            }
-            // Fallback for initial load: find props that are objects with no keys, a common pattern for deferred placeholders.
-            return typeof currentPage.props[key] === 'object' && currentPage.props[key] !== null && Object.keys(currentPage.props[key]).length === 0;
-        });
-
-        return deferredKeys.reduce((acc, key) => {
-            acc[key] = currentPage.props[key];
-            return acc;
-        }, {} as Record<string, any>);
-    };
 
     const handleClear = () => {
         setRequests([]);
@@ -148,75 +88,7 @@ const Panel: React.FC = () => {
         }
     }, [settings.appTheme]);
 
-    useEffect(() => {
-        const unhighlight = (element: HTMLElement) => {
-            const marks = element.querySelectorAll('mark');
-            marks.forEach(mark => {
-                const parent = mark.parentNode;
-                if (parent) {
-                    parent.replaceChild(document.createTextNode(mark.textContent || ''), mark);
-                    parent.normalize();
-                }
-            });
-        };
 
-        const highlight = (element: HTMLElement, searchTerm: string) => {
-            if (!searchTerm) return;
-            const regex = new RegExp(searchTerm, 'gi');
-            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
-            let node: Node | null;
-            const nodesToReplace: { parent: Node, oldNode: Node, newNode: Node }[] = [];
-
-            while (node = walker.nextNode()) {
-                const currentNode = node;
-                if (currentNode.parentElement?.tagName === 'MARK') continue;
-                if (regex.test(currentNode.textContent || '')) {
-                    const parent = currentNode.parentNode;
-                    if (!parent) continue;
-
-                    const fragment = document.createDocumentFragment();
-                    let lastIndex = 0;
-                    (currentNode.textContent || '').replace(regex, (match, offset) => {
-                        fragment.appendChild(document.createTextNode((currentNode.textContent || '').slice(lastIndex, offset)));
-                        const mark = document.createElement('mark');
-                        mark.textContent = match;
-                        fragment.appendChild(mark);
-                        lastIndex = offset + match.length;
-                        return match;
-                    });
-                    fragment.appendChild(document.createTextNode((currentNode.textContent || '').slice(lastIndex)));
-                    nodesToReplace.push({ parent, oldNode: currentNode, newNode: fragment });
-                }
-            }
-            nodesToReplace.forEach(({ parent, oldNode, newNode }) => {
-                parent.replaceChild(newNode, oldNode);
-            });
-        };
-
-        let container: HTMLDivElement | null = null;
-        if (activeTab === 'page') {
-            container = pageContainerRef.current;
-        } else if (activeTab === 'requests') {
-            container = requestsContainerRef.current;
-        } else if (activeTab === 'forms') {
-            container = formsContainerRef.current;
-        }
-
-        if (!container) return;
-
-        unhighlight(container);
-
-        if (highlightSearch) {
-            highlight(container, highlightSearch);
-            const highlightedNodes = container.querySelectorAll('mark');
-            if (highlightedNodes.length > 0) {
-                const activeNode = highlightedNodes[searchResultIndex % highlightedNodes.length];
-                activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                container.querySelectorAll('mark.active-highlight').forEach(node => node.classList.remove('active-highlight'));
-                activeNode.classList.add('active-highlight');
-            }
-        }
-    }, [highlightSearch, activeTab, currentPage, selectedRequest, searchResultIndex, activePageView]);
 
     useEffect(() => {
         const detectedKey = `inertia-detected-${tabId}`;
@@ -272,18 +144,7 @@ const Panel: React.FC = () => {
         };
     }, [tabId]);
 
-    const getSharedData = () => {
-        if (!currentPage || !previousPage) return {};
 
-        const currentKeys = Object.keys(currentPage.props);
-        const prevKeys = Object.keys(previousPage.props);
-        const sharedKeys = currentKeys.filter(key => prevKeys.includes(key) && JSON.stringify(currentPage.props[key]) === JSON.stringify(previousPage.props[key]));
-
-        return sharedKeys.reduce((acc, key) => {
-            acc[key] = currentPage.props[key];
-            return acc;
-        }, {} as Record<string, any>);
-    };
 
     const handleToggleCollapse = () => {
         const currentCollapsed = settings.jsonView.collapsed;
@@ -309,42 +170,10 @@ const Panel: React.FC = () => {
     };
 
     const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-
-            let container: HTMLDivElement | null = null;
-            if (activeTab === 'page') {
-                container = pageContainerRef.current;
-            } else if (activeTab === 'requests') {
-                container = requestsContainerRef.current;
-            } else if (activeTab === 'forms') {
-                container = formsContainerRef.current;
-            }
-
-            if (!container) return;
-
-            const highlightedNodes = container.querySelectorAll('mark');
-            if (highlightedNodes.length === 0) return;
-
-            if (e.shiftKey) {
-                setSearchResultIndex((prevIndex) => (prevIndex - 1 + highlightedNodes.length) % highlightedNodes.length);
-            } else {
-                setSearchResultIndex((prevIndex) => (prevIndex + 1) % highlightedNodes.length);
-            }
-        }
+        // Search functionality is now handled by individual panel components
     };
 
-    const { quotesOnKeys, ...restJsonViewSettings } = settings.jsonView;
 
-    const jsonViewProps = {
-        ...restJsonViewSettings,
-        style: {
-            ...themes[settings.jsonView.theme as keyof typeof themes],
-            fontSize: `${settings.jsonView.fontSize}px`,
-            padding: '12px',
-            lineHeight: '1.4',
-        },
-    };
 
     if (isLoading) {
         return (
@@ -438,413 +267,54 @@ const Panel: React.FC = () => {
                 </div>
                 <div className="flex-1 overflow-y-auto p-4">
                     {activeTab === 'requests' && (
-                        <div className="flex h-full">
-                            <div className="w-1/3 border-r dark:border-github-dark-border flex flex-col">
-                                <div className="p-4 border-b dark:border-github-dark-border bg-slate-50 dark:bg-github-dark-bg flex items-center justify-between">
-                                    <div>
-                                        <h3 className="font-semibold dark:text-github-dark-text">Requests</h3>
-                                        <p className="text-sm text-slate-600 dark:text-github-dark-text-secondary">{requests.length} requests</p>
-                                    </div>
-                                    <button onClick={handleClear} className="px-2 py-1 text-xs rounded bg-red-700 text-gray-100">Clear</button>
-                                </div>
-                                <div className="flex-1 overflow-y-auto">
-                                    {requests.map((request) => (
-                                        <div
-                                            key={request.id}
-                                            className={`p-3 border-b dark:border-github-dark-border cursor-pointer dark:hover:bg-slate-700 border-l-4 ${
-                                                selectedRequest?.id === request.id ? 'border-sky-500' :
-                                                request.status === 'success' ? 'border-green-500' :
-                                                request.status === 'error' ? 'border-red-500' :
-                                                'border-transparent'
-                                            }`}
-                                            onClick={() => setSelectedRequest(request)}
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="font-mono text-sm dark:text-github-dark-text-secondary">
-                                                        {request.method}
-                                                    </span>
-                                                    {request.isRedirect && <span className="text-xs font-semibold text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900 px-1.5 py-0.5 rounded-full">REDIRECT</span>}
-                                                    {request.visitType === 'initial' && <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-1.5 py-0.5 rounded-full">INITIAL</span>}
-                                                    {request.isPartial && <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900 px-1.5 py-0.5 rounded-full">PARTIAL</span>}
-                                                </div>
-                                                <span className="text-xs dark:text-github-dark-text-secondary">
-                                                    {new Date(request.timestamp).toLocaleTimeString()}
-                                                </span>
-                                            </div>
-                                            <div className="text-sm font-medium dark:text-github-dark-text mt-1">
-                                                {request.component || 'Unknown'}
-                                            </div>
-                                            <div className="text-xs dark:text-github-dark-text-secondary truncate">
-                                                {request.url}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="w-2/3 flex-1 flex flex-col min-w-0" ref={requestsContainerRef}>
-                                {selectedRequest ? (
-                                    <div className="flex-1 overflow-y-auto overflow-x-auto p-4 space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Request Details</h3>
-                                            <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
-                                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                                    <div>
-                                                        <span className="font-medium dark:text-github-dark-text-secondary">Status:</span>
-                                                        <span className={`ml-2 font-mono ${selectedRequest.status === 'success' ? 'text-green-600' : selectedRequest.status === 'error' ? 'text-red-600' : 'text-slate-600'}`}>{selectedRequest.status}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="font-medium dark:text-github-dark-text-secondary">Method:</span>
-                                                        <span className="ml-2 font-mono dark:text-github-dark-text truncate">{selectedRequest.method}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="font-medium dark:text-github-dark-text-secondary">URL:</span>
-                                                        <span className="ml-2 dark:text-github-dark-text truncate break-all">{selectedRequest.url}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="font-medium dark:text-github-dark-text-secondary">Component:</span>
-                                                        <span className="ml-2 font-mono dark:text-github-dark-text truncate break-all">{selectedRequest.component}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="font-medium dark:text-github-dark-text-secondary">Response time:</span>
-                                                        <span className="ml-2 dark:text-github-dark-text">{selectedRequest.responseTime}ms</span>
-                                                    </div>
-                                                </div>
-                                                {selectedRequest.isPartial && selectedRequest.only && (
-                                                    <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                                                        <span className="font-medium dark:text-github-dark-text-secondary">Partially Loaded Props:</span>
-                                                        <div className="flex flex-wrap gap-2 mt-2">
-                                                            {selectedRequest.only.map(prop => (
-                                                                <span key={prop} className="px-2 py-1 text-xs font-mono bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded-full">{prop}</span>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">URL Analysis</h3>
-                                            <div className="p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg text-sm space-y-2">
-                                                <div>
-                                                    <span className="font-medium dark:text-github-dark-text-secondary">Full URL:</span>
-                                                    <span className="ml-2 font-mono dark:text-github-dark-text break-all truncate">{selectedRequest.url}</span>
-                                                </div>
-                                                <div>
-                                                    <span className="font-medium dark:text-github-dark-text-secondary">Query Parameters:</span>
-                                                    <div className="mt-1 pl-4">
-                                                        {((): JSX.Element => {
-                                                            try {
-                                                                const params = Array.from(new URL(selectedRequest.url, window.location.origin).searchParams.entries());
-                                                                if (params.length === 0) return <span className="text-slate-500 dark:text-github-dark-text-secondary ml-2">None</span>;
-                                                                return (
-                                                                    <table className="w-full text-left">
-                                                                        <tbody>
-                                                                        {params.map(([key, value]) => (
-                                                                            <tr key={key}>
-                                                                                <td className="pr-4 font-mono dark:text-github-dark-text-secondary">{key}</td>
-                                                                                <td className="font-mono dark:text-github-dark-text">{value}</td>
-                                                                            </tr>
-                                                                        ))}
-                                                                        </tbody>
-                                                                    </table>
-                                                                )
-                                                            } catch (e) {
-                                                                return <span className="text-slate-500 dark:text-github-dark-text-secondary ml-2">Invalid URL</span>
-                                                            }
-                                                        })()}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {selectedRequest.errors && (
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-red-600 mb-3">Errors</h3>
-                                                <div className="border border-red-300 dark:border-red-700 rounded-lg overflow-hidden">
-                                                    <JsonView
-                                                        value={selectedRequest.errors}
-                                                        displayDataTypes={false}
-                                                        enableClipboard={true}
-                                                        style={{ padding: '12px' }}
-                                                    >
-                                                        {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-                                                    </JsonView>
-                                                </div>
-                                            </div>
-                                        )}
-                                        <div>
-                                            <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Props</h3>
-                                            <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
-                                                <Toolbar
-                                                    onSearch={setHighlightSearch}
-                                                    onKeyDown={handleSearchKeyDown}
-                                                    onToggleCollapse={handleToggleCollapse}
-                                                    onIndentIncrease={() => handleIndentChange(1)}
-                                                    onIndentDecrease={() => handleIndentChange(-1)}
-                                                    onFontSizeIncrease={() => handleFontSizeChange(1)}
-                                                    onFontSizeDecrease={() => handleFontSizeChange(-1)}
-                                                    isCollapsed={settings.jsonView.collapsed !== false}
-                                                />
-                                                <JsonView
-                                                    value={selectedRequest.props || {}}
-                                                    {...jsonViewProps}
-                                                >
-                                                    {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-                                                </JsonView>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-github-dark-text-secondary">
-                                        Select a request from the timeline to view details.
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <RequestsPanel
+                            requests={requests}
+                            selectedRequest={selectedRequest}
+                            onRequestSelect={setSelectedRequest}
+                            onClear={handleClear}
+                            highlightSearch={highlightSearch}
+                            onSearchKeyDown={handleSearchKeyDown}
+                            onToggleCollapse={handleToggleCollapse}
+                            onIndentChange={handleIndentChange}
+                            onFontSizeChange={handleFontSizeChange}
+                            settings={settings}
+                            effectiveTheme={effectiveTheme}
+                            onHighlightSearch={setHighlightSearch}
+                        />
                     )}
                     {activeTab === 'page' && currentPage && (
-                        <div ref={pageContainerRef}>
-                            <div className="mb-6 p-4 bg-slate-50 dark:bg-github-dark-bg-secondary rounded-lg">
-                                <h3 className="text-lg font-semibold dark:text-github-dark-text mb-2">Current Page</h3>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <span className="font-medium dark:text-github-dark-text-secondary">Component:</span>
-                                        <span className="ml-2 font-mono dark:text-github-dark-text">{currentPage.component}</span>
-                                    </div>
-                                    <div>
-                                        <span className="font-medium dark:text-github-dark-text-secondary">URL:</span>
-                                        <span className="ml-2 dark:text-github-dark-text">{currentPage.url}</span>
-                                    </div>
-                                    {currentPage.version && (
-                                        <div>
-                                            <span className="font-medium dark:text-github-dark-text-secondary">Version:</span>
-                                            <span className="ml-2 font-mono dark:text-github-dark-text">{currentPage.version}</span>
-                                        </div>
-                                    )}
-                                    {framework && (
-                                        <div>
-                                            <span className="font-medium dark:text-github-dark-text-secondary">Framework:</span>
-                                            <span className="ml-2 font-mono dark:text-github-dark-text">{framework.name} {framework.version}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="border-t dark:border-github-dark-border mt-4">
-                                <nav className="flex items-center space-x-4 px-2 -mb-px">
-                                    <button
-                                        onClick={() => setActivePageView('props')}
-                                        className={`py-2 px-1 border-b-2 font-medium text-sm ${activePageView === 'props' ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-500 hover:text-slate-600'}`}
-                                    >
-                                        Props
-                                    </button>
-                                    <button
-                                        onClick={() => setActivePageView('shared')}
-                                        className={`py-2 px-1 border-b-2 font-medium text-sm ${activePageView === 'shared' ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-500 hover:text-slate-600'}`}
-                                    >
-                                        Shared
-                                    </button>
-                                    <button
-                                        onClick={() => setActivePageView('deferred')}
-                                        className={`py-2 px-1 border-b-2 font-medium text-sm ${activePageView === 'deferred' ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-500 hover:text-slate-600'}`}
-                                    >
-                                        Deferred
-                                    </button>
-                                </nav>
-                            </div>
-                            <div className="mt-4">
-                                <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
-                                    <Toolbar
-                                        onSearch={setHighlightSearch}
-                                        onKeyDown={handleSearchKeyDown}
-                                        onToggleCollapse={handleToggleCollapse}
-                                        onIndentIncrease={() => handleIndentChange(1)}
-                                        onIndentDecrease={() => handleIndentChange(-1)}
-                                        onFontSizeIncrease={() => handleFontSizeChange(1)}
-                                        onFontSizeDecrease={() => handleFontSizeChange(-1)}
-                                        isCollapsed={settings.jsonView.collapsed !== false}
-                                    />
-                                    {activePageView === 'props' &&
-                                        <JsonView value={currentPage.props || {}} {...jsonViewProps}>
-                                            {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-                                        </JsonView>
-                                    }
-                                    {activePageView === 'shared' &&
-                                        <JsonView value={getSharedData()} {...jsonViewProps}>
-                                            {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-                                        </JsonView>
-                                    }
-                                    {activePageView === 'deferred' &&
-                                        <JsonView value={getDeferredData()} {...jsonViewProps}>
-                                            {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-                                        </JsonView>
-                                    }
-                                </div>
-                            </div>
-                        </div>
+                        <PagePanel
+                            currentPage={currentPage}
+                            previousPage={previousPage}
+                            framework={framework}
+                            activePageView={activePageView}
+                            setActivePageView={setActivePageView}
+                            highlightSearch={highlightSearch}
+                            onSearchKeyDown={handleSearchKeyDown}
+                            onToggleCollapse={handleToggleCollapse}
+                            onIndentChange={handleIndentChange}
+                            onFontSizeChange={handleFontSizeChange}
+                            settings={settings}
+                            onHighlightSearch={setHighlightSearch}
+                        />
                     )}
                     {activeTab === 'forms' && (
-                        <div className="flex h-full">
-                            <div className="w-1/3 border-r dark:border-github-dark-border flex flex-col">
-                                <div className="p-4 border-b dark:border-github-dark-border bg-slate-50 dark:bg-github-dark-bg flex items-center justify-between">
-                                    <div>
-                                        <h3 className="font-semibold dark:text-github-dark-text">Form Submissions</h3>
-                                        <p className="text-sm text-slate-600 dark:text-github-dark-text-secondary">{requests.filter(r => ['POST', 'PUT', 'PATCH'].includes(r.method)).length} submissions</p>
-                                    </div>
-                                    <button onClick={handleClear} className="px-2 py-1 text-xs rounded bg-red-700 text-gray-100">Clear</button>
-                                </div>
-                                <div className="flex-1 overflow-y-auto">
-                                    {requests.filter(r => ['POST', 'PUT', 'PATCH'].includes(r.method)).map((request) => (
-                                        <div
-                                            key={request.id}
-                                            className={`p-3 border-b dark:border-github-dark-border cursor-pointer dark:hover:bg-slate-700 border-l-4 ${
-                                                selectedRequest?.id === request.id ? 'border-sky-500' :
-                                                request.status === 'success' ? 'border-green-500' :
-                                                request.status === 'error' ? 'border-red-500' :
-                                                'border-transparent'
-                                            }`}
-                                            onClick={() => setSelectedRequest(request)}
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <span className="font-mono text-sm dark:text-github-dark-text-secondary">
-                                                    {request.method}
-                                                </span>
-                                                <span className="text-xs dark:text-github-dark-text-secondary">
-                                                    {new Date(request.timestamp).toLocaleTimeString()}
-                                                </span>
-                                            </div>
-                                            <div className="text-sm font-medium dark:text-github-dark-text mt-1">
-                                                {request.component || 'Unknown'}
-                                            </div>
-											<div className="text-xs dark:text-github-dark-text-secondary truncate">
-												{request.url}
-											</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="w-2/3 flex-1 flex flex-col" ref={formsContainerRef}>
-                                {selectedRequest ? (
-                                    (() => {
-                                        const validationErrors = selectedRequest.errors || selectedRequest.props?.errors;
-                                        return (
-                                            <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                                                {selectedRequest.data && (
-                                                    <div>
-                                                        <h3 className="text-lg font-semibold dark:text-github-dark-text mb-3">Form Data</h3>
-                                                        <div className="border dark:border-github-dark-border rounded-lg overflow-hidden">
-                                                            <Toolbar
-                                                                onSearch={setHighlightSearch}
-                                                                onKeyDown={handleSearchKeyDown}
-                                                                onToggleCollapse={handleToggleCollapse}
-                                                                onIndentIncrease={() => handleIndentChange(1)}
-                                                                onIndentDecrease={() => handleIndentChange(-1)}
-                                                                onFontSizeIncrease={() => handleFontSizeChange(1)}
-                                                                onFontSizeDecrease={() => handleFontSizeChange(-1)}
-                                                                isCollapsed={settings.jsonView.collapsed !== false}
-                                                            />
-                                                            <JsonView value={selectedRequest.data} {...jsonViewProps}>
-                                                                {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-                                                            </JsonView>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {validationErrors && (
-                                                    <div>
-                                                        <h3 className="text-lg font-semibold text-red-600 mb-3">Validation Errors</h3>
-                                                        <div className="border border-red-300 dark:border-red-700 rounded-lg overflow-hidden">
-                                                            <JsonView
-                                                                value={validationErrors}
-                                                                displayDataTypes={false}
-                                                                enableClipboard={true}
-                                                                style={{ padding: '12px' }}
-                                                            >
-                                                                {!quotesOnKeys && <JsonView.Quote render={() => <span />} />}
-                                                            </JsonView>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )
-                                    })()
-                                ) : (
-                                    <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-github-dark-text-secondary">
-                                        Select a submission from the timeline to view details.
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <FormsPanel
+                            requests={requests}
+                            selectedRequest={selectedRequest}
+                            onRequestSelect={setSelectedRequest}
+                            onClear={handleClear}
+                            highlightSearch={highlightSearch}
+                            onSearchKeyDown={handleSearchKeyDown}
+                            onToggleCollapse={handleToggleCollapse}
+                            onIndentChange={handleIndentChange}
+                            onFontSizeChange={handleFontSizeChange}
+                            settings={settings}
+                            onHighlightSearch={setHighlightSearch}
+                        />
                     )}
                     {activeTab === 'routes' && currentPage?.props?.ziggy && (
-                        <div className="flex flex-col h-full">
-                            <div className="p-4 border-b dark:border-github-dark-border">
-                                <input
-                                    type="text"
-                                    placeholder="Search routes..."
-                                    value={routesSearch}
-                                    onChange={(e) => setRoutesSearch(e.target.value)}
-                                    className="w-full px-3 py-2 text-sm bg-slate-100 dark:bg-github-dark-button-bg dark:text-github-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                                />
-                            </div>
-                            <div className="flex-1 overflow-y-auto">
-                                {Object.entries(currentPage.props.ziggy.routes)
-                                    .filter(([name, route]: [string, any]) => {
-                                        if (!routesSearch) return true;
-                                        const searchTerm = routesSearch.toLowerCase();
-                                        return (
-                                            name.toLowerCase().includes(searchTerm) ||
-                                            route.uri.toLowerCase().includes(searchTerm)
-                                        );
-                                    })
-                                    .map(([name, route]: [string, any]) => (
-                                        <div key={name} className="p-4 border-b dark:border-github-dark-border">
-                                            <div className="font-semibold text-lg dark:text-github-dark-text mb-3">{name}</div>
-                                            <div className="space-y-2">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">URI:</div>
-                                                    <div className="font-mono text-slate-800 dark:text-github-dark-text">{route.uri}</div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Methods:</div>
-                                                    <div className="flex gap-1">
-                                                        {route.methods.map((method: string) => (
-                                                            <span key={method} className={`px-1 text-xs font-semibold rounded-sm ${
-                                                                method === 'GET' ? 'bg-green-100 text-green-800' :
-                                                                method === 'POST' ? 'bg-blue-100 text-blue-800' :
-                                                                method === 'PUT' || method === 'PATCH' ? 'bg-yellow-100 text-yellow-800' :
-                                                                method === 'DELETE' ? 'bg-red-100 text-red-800' :
-                                                                'bg-gray-100 text-gray-800'
-                                                            }`}>
-                                                                {method}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                  <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Middleware:</div>
-                                                  <div className="font-mono text-slate-800 dark:text-github-dark-text">
-                                                      {route.middleware && route.middleware.length > 0 ? route.middleware.join(', ') : 'none'}
-                                                  </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                  <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Bindings:</div>
-                                                  <div className="font-mono text-slate-800 dark:text-github-dark-text">
-                                                      {route.bindings && Object.keys(route.bindings).length > 0 ? JSON.stringify(route.bindings) : 'none'}
-                                                  </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                  <div className="font-medium text-slate-500 dark:text-github-dark-text-secondary">Wheres:</div>
-                                                  <div className="font-mono text-slate-800 dark:text-github-dark-text">
-                                                      {route.wheres && Object.keys(route.wheres).length > 0 ? JSON.stringify(route.wheres) : 'none'}
-                                                  </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                            </div>
-                        </div>
+                        <RoutesPanel currentPage={currentPage} />
                     )}
                     {activeTab === 'settings' && (
                         <Settings settings={settings} onSettingsChange={handleSettingsChange} />
