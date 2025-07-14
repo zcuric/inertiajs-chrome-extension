@@ -1,13 +1,27 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.1.1/schema.json",
 	"files": {
-		"includes": ["**/src/**", "!**/build/**", "!**/config/**"]
+		"includes": [
+			"**/src/**",
+			"!**/build/**",
+			"!**/config/**",
+			"!**/temp-compiled/**"
+		]
 	},
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"correctness": {
+				"useHookAtTopLevel": "error"
+			},
+			"nursery": {
+				"noNestedComponentDefinitions": "error"
+			}
 		}
+	},
+	"javascript": {
+		"globals": ["chrome"]
 	}
 }
