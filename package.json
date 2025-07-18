@@ -22,7 +22,7 @@
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
-    "@biomejs/biome": "^2.1.1",
+    "@biomejs/biome": "^2.1.2",
     "@types/adm-zip": "^0.5.7",
     "@types/bun": "latest",
     "@types/chrome": "^0.0.332",
@@ -32,17 +32,17 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-plugin-react-compiler": "^19.1.0-rc.2",
     "chalk": "^5.4.1",
-    "lefthook": "^1.12.1",
+    "lefthook": "^1.12.2",
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",
     "postcss-import": "^16.1.1",
     "tailwindcss": "^3.4.17"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.5.4"
   },
   "dependencies": {
-    "@uiw/react-json-view": "^2.0.0-alpha.32",
+    "@uiw/react-json-view": "^2.0.0-alpha.33",
     "element-ready": "^8.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
