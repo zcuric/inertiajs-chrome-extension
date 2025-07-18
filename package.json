@@ -13,7 +13,8 @@
     "build:original": "bun run config/build.ts",
     "dev": "bun run config/watch.ts",
     "pack": "bun run config/pack.ts",
-    "css": "postcss"
+    "css": "postcss",
+    "release": "bun run release.ts"
   },
   "devDependencies": {
     "@babel/cli": "^7.28.0",
