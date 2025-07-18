@@ -1,6 +1,6 @@
 {
   "name": "inertiajs-chrome-extension",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "A browser extension for debugging Inertia.js applications, built with Bun, React, and TypeScript.",
   "license": "MIT",
   "repository": {
