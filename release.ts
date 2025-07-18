@@ -40,10 +40,10 @@ const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const currentVersion = pkg.version;
 const newVersion = bumpVersion(currentVersion, bumpType);
 
-updateJsonVersion("build/manifest.json", newVersion);
+updateJsonVersion("public/manifest.json", newVersion);
 updateJsonVersion("package.json", newVersion);
 
-await $`git add build/manifest.json package.json`;
+await $`git add public/manifest.json package.json`;
 await $`git commit -m "chore: bump extension version to ${newVersion}"`;
 console.log("Committed version bump.");
 
