@@ -466,12 +466,6 @@ const PagePanel: React.FC<PagePanelProps> = ({
 								Open Source
 							</button>
 						</div>
-							<div>
-								<span className="font-medium dark:text-gray-400">URL:</span>
-								<span className="ml-2 dark:text-white break-all">
-									{currentPage.url}
-								</span>
-							</div>
 							{currentPage.version && (
 								<div>
 									<span className="font-medium dark:text-gray-400">

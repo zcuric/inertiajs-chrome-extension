@@ -298,9 +298,14 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
 							<div className="text-sm font-medium dark:text-white mt-1">
 								{request.component || "Unknown"}
 							</div>
-							<div className="text-xs dark:text-gray-400 truncate">
-								{request.url}
-							</div>
+					<div
+						className="text-xs dark:text-gray-400 truncate"
+						style={{ maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+						// Tooltip for full URL on hover
+						title={request.url}
+					>
+						{request.url}
+					</div>
 						</div>
 					))}
 				</div>
@@ -333,17 +338,20 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
 								</div>
 								<div>
 									<span className="font-medium dark:text-gray-400">URL:</span>
-									<span className="ml-2 dark:text-white truncate break-all">
-										{selectedRequest.url}
-									</span>
+					<span
+						className="ml-2 dark:text-white break-all"
+						style={{ wordBreak: 'break-all', whiteSpace: 'normal' }}
+					>
+						{selectedRequest.url}
+					</span>
 								</div>
 								<div>
 									<span className="font-medium dark:text-gray-400">
 										Component:
 									</span>
-									<span className="ml-2 font-mono dark:text-white truncate break-all">
-										{selectedRequest.component}
-									</span>
+					<span className="ml-2 font-mono dark:text-white truncate break-all">
+						{selectedRequest.component}
+					</span>
 								</div>
 								<div>
 									<span className="font-medium dark:text-gray-400">
@@ -379,9 +387,12 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
 									<span className="font-medium dark:text-gray-400">
 										Full URL:
 									</span>
-									<span className="ml-2 font-mono dark:text-white break-all truncate">
-										{selectedRequest.url}
-									</span>
+					<span
+						className="ml-2 font-mono dark:text-white break-all"
+						style={{ wordBreak: 'break-all', whiteSpace: 'normal' }}
+					>
+						{selectedRequest.url}
+					</span>
 								</div>
 
 								<div>
@@ -389,39 +400,73 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
 										Query Parameters:
 									</span>
 									<div className="mt-1 pl-4">
-										{(() => {
-											try {
-												const url = new URL(selectedRequest.url);
-												const params = Array.from(url.searchParams.entries());
-												if (params.length === 0)
-													return (
-														<span className="text-slate-500 dark:text-gray-400 ml-2">
-															None
-														</span>
-													);
-
-												return (
-													<table className="min-w-full">
-														<tbody>
-															{params.map(([key, value]) => (
-																<tr key={key}>
-																	<td className="pr-4 font-mono dark:text-gray-400">
-																		{key}
-																	</td>
-																	<td className="dark:text-white">{value}</td>
-																</tr>
-															))}
-														</tbody>
-													</table>
-												);
-											} catch (e) {
-												return (
-													<span className="text-slate-500 dark:text-gray-400 ml-2">
-														Invalid URL
-													</span>
-												);
-											}
-										})()}
+						{(() => {
+							try {
+								// Handle both relative and absolute URLs
+								let urlToAnalyze: string;
+								if (selectedRequest.url.startsWith('http')) {
+									urlToAnalyze = selectedRequest.url;
+								} else {
+									urlToAnalyze = `https://example.com${selectedRequest.url}`;
+								}
+								const url = new URL(urlToAnalyze);
+								const params = Array.from(url.searchParams.entries());
+								if (params.length === 0) {
+									return (
+										<span className="text-slate-500 dark:text-gray-400">
+											None
+									</span>
+								);
+								}
+								return (
+									<div className="space-y-1">
+										{params.map(([key, value]) => (
+											<div key={key} className="flex items-start gap-2">
+												<span className="font-mono text-xs dark:text-gray-400 min-w-0 flex-shrink-0">
+													{key}:
+												</span>
+												<span className="dark:text-white text-xs break-all">
+													{value}
+												</span>
+											</div>
+										))}
+									</div>
+								);
+							} catch (e) {
+								const queryIndex = selectedRequest.url.indexOf('?');
+								if (queryIndex === -1) {
+									return (
+										<span className="text-slate-500 dark:text-gray-400">
+											None
+									</span>
+								);
+								}
+								const queryString = selectedRequest.url.substring(queryIndex + 1);
+								const params = new URLSearchParams(queryString);
+								const paramEntries = Array.from(params.entries());
+								if (paramEntries.length === 0) {
+									return (
+										<span className="text-slate-500 dark:text-gray-400">
+											None
+									</span>
+								);
+								}
+								return (
+									<div className="space-y-1">
+										{paramEntries.map(([key, value]) => (
+											<div key={key} className="flex items-start gap-2">
+												<span className="font-mono text-xs dark:text-gray-400 min-w-0 flex-shrink-0">
+													{key}:
+												</span>
+												<span className="dark:text-white text-xs break-all">
+													{value}
+												</span>
+											</div>
+										))}
+									</div>
+								);
+							}
+						})()}
 									</div>
 								</div>
 							</div>
