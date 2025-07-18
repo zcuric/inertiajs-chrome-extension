@@ -1,3 +1,4 @@
+
 import JsonView from "@uiw/react-json-view";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -5,6 +6,9 @@ import { CSS_CLASSES, JSON_VIEW_DEFAULTS, PAGE_VIEWS } from "./constants";
 import Toolbar from "./Toolbar";
 import { themes } from "./themes";
 import type { InertiaPage, PanelSettings } from "./types";
+
+
+import { openComponentSource } from "./utils/openComponentSource";
 
 type PageView = (typeof PAGE_VIEWS)[keyof typeof PAGE_VIEWS];
 
@@ -444,16 +448,24 @@ const PagePanel: React.FC<PagePanelProps> = ({
 					Current Page
 				</h3>
 				<div className="space-y-4">
-					<div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-lg">
-						<div className="grid grid-cols-1 gap-4 text-sm">
-							<div>
-								<span className="font-medium dark:text-gray-400">
-									Component:
-								</span>
-								<span className="ml-2 font-mono dark:text-white">
-									{currentPage.component}
-								</span>
-							</div>
+				<div className="p-4 bg-slate-50 dark:bg-gray-800 rounded-lg">
+					<div className="grid grid-cols-1 gap-4 text-sm">
+						<div className="flex items-center gap-2">
+							<span className="font-medium dark:text-gray-400">
+								Component:
+							</span>
+							<span className="ml-2 font-mono dark:text-white">
+								{currentPage.component}
+							</span>
+							<button
+								type="button"
+								className="ml-2 px-2 py-1 text-xs rounded bg-sky-500 text-white hover:bg-sky-600 transition-colors"
+								title="Open source in DevTools Sources tab"
+								onClick={() => openComponentSource(currentPage.component)}
+							>
+								Open Source
+							</button>
+						</div>
 							<div>
 								<span className="font-medium dark:text-gray-400">URL:</span>
 								<span className="ml-2 dark:text-white break-all">
