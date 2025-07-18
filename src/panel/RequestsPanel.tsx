@@ -305,7 +305,7 @@ const RequestsPanel: React.FC<RequestsPanelProps> = ({
 					))}
 				</div>
 			</div>
-			<div className="w-2/3 flex-1 flex flex-col min-w-0">
+			<div className="flex-1 flex flex-col min-w-0">
 				{selectedRequest ? (
 					<div className="flex-1 overflow-y-auto overflow-x-auto p-4 space-y-6">
 						<h3 className="text-lg font-semibold dark:text-white mb-3">
