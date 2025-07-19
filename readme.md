@@ -2,7 +2,9 @@
 
 A browser extension for debugging Inertia.js applications, built with Bun, React, and TypeScript. It provides a clean and intuitive interface to help you inspect your application's state and behavior.
 
-<img width="1276" height="800" alt="Screenshot 2025-07-10 at 17 36 30" src="https://github.com/user-attachments/assets/6076326e-1c7a-408d-80b1-04e3e15210cf" />
+
+<img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/db8fe5ea-0962-4530-a2be-1adfd7397832" />
+
 
 ## Features
 
